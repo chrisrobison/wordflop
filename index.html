@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel='stylesheet' href='style.css'>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body id="home">
+    <header>
+    </header>
+    <main class='player0'>
+        <section>
+            <nav>
+                <h2>Player 1 Words</h2>
+                <div class='words' id='player0Words'></div>
+                <div class='arrow'></div>
+            </nav>
+            <div id="board">
+
+            </div>
+            <aside>
+                <div class='arrow'></div>
+                <h2>Player 2 Words</h2>
+                <div class='words' id='player1Words'></div>
+            </aside>
+        </section>
+    </main>
+    <footer>
+    </footer>
+    <script>
+        function $(str) {
+            return document.querySelector(str);
+        }
+
+        function $$(str) {
+            return document.querySelectorAll(str);
+        }
+    </script>
+    <script src='app.js'></script>
+</body>
+
+</html>
