@@ -69,10 +69,6 @@ aside {
     cursor: default;
 }
 
-.cell:hover {
-    background-color: #0aec;
-}
-
 .letter {
     position: absolute;
     font-family: "Roboto Mono", monospace;
@@ -139,10 +135,11 @@ h2 {
     width:5em;
 }
 .line {
-    transform-origin: top left;
+    transform-origin: 17px 17px;
     position:absolute;
     z-index: 4001;
-    background-color:#ff0;
+    border: 3px solid #fff;
+    border-radius: 25px;
 }
 @keyframes bounce0 {
 

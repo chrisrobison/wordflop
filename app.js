@@ -27,7 +27,8 @@ function $$(str) {
             current: {
                 cells: [],
                 word: [],
-                used: []
+                used: [],
+                lines: []
             },
             currentPlayer: 0,
             queue: [],
@@ -104,34 +105,45 @@ function $$(str) {
             let parts = id.split(/\D/).slice(1);
 
             return {
-                y: parts[0],
-                x: parts[1]
+                y: parts[0], row: parts[0],
+                x: parts[1], col: parts[1]
             };
         },
         getCell: function(x, y) {
             let col = Math.floor(x / app.config.cellWidth);
             let row = Math.floor(y / app.config.cellHeight);
-            return `r${row}c${col}`;
+            return { 
+                id: `r${row}c${col}`, 
+                el: $(`#r${row}c${col}`), 
+                row: row,
+                col: col
+            };
         },
         mkLine: function(x, y) {
-            app.state.currentLine = document.createElement('div');
-            const l = app.state.currentLine;
+            app.state.current.lines.push(app.state.currentLine);
 
+            const line = document.createElement('div');
+            app.state.currentLine = line;
+
+            // Use maths to determine line length and angle between 
+            // last known position and current x,y coordinates
             let dx = app.state.lastPos.x - x;
             let dy = app.state.lastPos.y - y;
+
             let theta = Math.atan2(dy, dx);
             theta *= 180 / Math.PI;
             if (theta < 0) theta = 360 + theta;
+            theta -= 180;
+            let angle = Math.round(theta / 45) * 45;
             let len = Math.sqrt((dx * dx) + (dy * dy));
 
-            l.classList.add('line');
-            l.style.top = app.state.lastPos.y + 'px';
-            l.style.left = app.state.lastPos.x + 'px';
-            l.style.transform = `rotate(-${theta}deg)`;
-            l.style.width = len + 'px';
-            l.style.height = "10px";
-            l.style.backgroundColor = "#ff0";
-            $("main").appendChild(l);
+            line.classList.add('line');
+            line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 19) + 'px';
+            line.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) - 9) + 'px';
+            line.style.transform = `rotate(-${angle}deg)`;
+            line.style.width = len + 'px';
+            line.style.height = (app.config.cellHeight - 3) + "px";
+            $("main").appendChild(line);
         },
         doDown: function(e) {
             console.dir(e);
@@ -142,8 +154,11 @@ function $$(str) {
                 x: e.clientX,
                 y: e.clientY
             };
-
-            e.target.classList.add('selected');
+            app.state.offsetPos {
+                x: e.target.offsetX,
+                y: e.target.offsetY
+            };
+            //e.target.classList.add('selected');
             let coord = app.getCoord(e.target.id);
             app.state.currentWord = app.state.board[coord.y][coord.x];
             $("#currentWord").innerHTML = app.state.currentWord;
@@ -163,16 +178,23 @@ function $$(str) {
             dy = app.state.lastPos.y - e.clientY;
 
             len = Math.sqrt((dx * dx) + (dy * dy));
-            theta = Math.atan2(dy, dx);
-            theta *= 180 / Math.PI;
+            theta = 360 - (Math.atan2(dy, dx) * (180 / Math.PI));
 
-            theta -= 180;
+            let angle = Math.round(theta / 45) * 45;
+            //l.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight)  ) + 'px';
+            //l.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) ) + 'px';
 
-            l.style.top = app.state.lastPos.y + 'px';
-            l.style.left = app.state.lastPos.x + 'px';
-
-            l.style.transform = `rotate(${theta}deg)`;
+            l.style.transform = `scaleX(-1) rotate(${angle}deg)`;
             l.style.width = len + 'px';
+            
+            /*
+            let cell = app.getCell(e.x, e.y);
+            let start = app.getCell(app.state.lastPos.x, app.state.lastPos.y);
+
+            let newword = app.getLetters(start.id, cell.id);
+            app.state.currentWord = newword;
+            $("#currentWord").innerHTML = newword;
+            */
         },
         doUp: function(e) {
             console.log("mouseup");
@@ -180,6 +202,13 @@ function $$(str) {
             $("#board").removeEventListener("mouseup", app.doUp);
             $("#board").removeEventListener("mousemove", app.doMove);
             app.state.currentLine.remove();
+
+            let cell = app.getCell(e.x, e.y);
+            let start = app.getCell(app.state.lastPos.x, app.state.lastPos.y);
+
+            let newword = app.getLetters(start.id, cell.id);
+            app.state.currentWord = newword;
+            $("#currentWord").innerHTML = newword;
 
             let word = app.checkWord(app.state.currentWord);
 
@@ -210,9 +239,10 @@ function $$(str) {
             console.log("doOver");
             console.dir(e);
             let tgt = e.target;
+            const coords = app.getCoord(tgt.id);
+            //$(`#r${coords.y}c${coords.x}`).classList.add('selected');
+            
             if (e.target.id.match(/^letter/)) {
-
-                const coords = app.getCoord(tgt.id);
                 const key = e.target.id.replace(/^letter_/, '');
 
                 if (!app.state.current.used.includes(key)) {
@@ -224,10 +254,30 @@ function $$(str) {
                     app.state.current.word.push(l);
                     app.state.current.cells.push(e.target);
                     app.state.current.used.push(key);
-                    $(`#r${coords.y}c${coords.x}`).classList.add('selected');
                 }
             }
 
+        },
+        getLetters: function(startcell, endcell) {
+            let [y1, x1] = startcell.split(/\D/).slice(1);
+            let [y2, x2] = endcell.split(/\D/).slice(1);
+            x1 = parseInt(x1); x2 = parseInt(x2); y1 = parseInt(y1); y2 = parseInt(y2); 
+
+            let xi = (x1 > x2) ? -1 : 1;
+            let yi = (y1 > y2) ? -1 : 1;
+            let out = '', cnt = 0;
+            for (let c=x1; c!=x2; c += xi) {
+                for (let r=y1; r!=y2; r+= yi) {
+                    out += app.state.board[r][c];
+                    cnt++;
+
+                    if (cnt > 25) {
+                        console.log("Too many letters.  Broken loop?");
+                        break;
+                    }
+                }
+            }
+            return out;
         },
         shuffle: function(array) {
             for (let i = array.length - 1; i > 0; i--) {
