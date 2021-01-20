@@ -48,14 +48,7 @@ function $$(str) {
         },
         init: function() {
             app.state.loaded = true;
-            fetch("wordlist.json").then(response => response.json()).then(function(data) {
-                app.state.words = data.words;
-                console.dir(data);
-            });
-            fetch("all.js").then(response => response.json()).then(function(data) {
-                console.dir(data);
-                app.state.dictionary = data;
-            });
+            fetch("all.js").then(response => response.json()).then(data => { app.state.dictionary = data; });
 
             app.initLetters();
 
@@ -139,22 +132,24 @@ function $$(str) {
 
             line.classList.add('line');
             line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 19) + 'px';
-            line.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) - 9) + 'px';
+            line.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) - 19) + 'px';
             line.style.transform = `rotate(-${angle}deg)`;
             line.style.width = len + 'px';
             line.style.height = (app.config.cellHeight - 3) + "px";
             $("main").appendChild(line);
+
+            app.state.current.lines.unshift(line);
+
+            return line;
         },
         doDown: function(e) {
             console.dir(e);
-            if (!e.target.id.match(/^letter_/)) {
-                return false;
-            }
+//            if (!e.target.id.match(/^letter_/)) { return false; }
             app.state.lastPos = {
                 x: e.clientX,
                 y: e.clientY
             };
-            app.state.offsetPos {
+            app.state.offsetPos = {
                 x: e.target.offsetX,
                 y: e.target.offsetY
             };
@@ -172,7 +167,6 @@ function $$(str) {
             app.mkLine(e.clientX + 5, e.clientY + 5);
         },
         doMove: function(e) {
-            const l = app.state.currentLine;
             let dx, dy, theta, len;
             dx = app.state.lastPos.x - e.clientX;
             dy = app.state.lastPos.y - e.clientY;
@@ -184,8 +178,11 @@ function $$(str) {
             //l.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight)  ) + 'px';
             //l.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) ) + 'px';
 
-            l.style.transform = `scaleX(-1) rotate(${angle}deg)`;
-            l.style.width = len + 'px';
+            // let newwidth = Math.round(len / app.config.cellWidth) * app.config.cellWidth;
+            if (app.state.current.lines[0]) {
+                app.state.current.lines[0].style.transform = `scaleX(-1) rotate(${angle}deg)`;
+                app.state.current.lines[0].style.width = len + app.config.cellWidth + 'px';
+            }
             
             /*
             let cell = app.getCell(e.x, e.y);
@@ -236,47 +233,51 @@ function $$(str) {
             $("main").classList.add("player" + app.state.currentPlayer);
         },
         doOver: function(e) {
+            clearTimeout(app.state.overTimeout);
+            clearTimeout(app.state.lineTimeout);
             console.log("doOver");
             console.dir(e);
             let tgt = e.target;
-            const coords = app.getCoord(tgt.id);
             //$(`#r${coords.y}c${coords.x}`).classList.add('selected');
             
-            if (e.target.id.match(/^letter/)) {
-                const key = e.target.id.replace(/^letter_/, '');
-
-                if (!app.state.current.used.includes(key)) {
-                    let l = app.state.board[coords.y][coords.x];
-                    console.log("Added " + l + " to word [" + app.state.currentWord + "]");
-                    app.state.currentWord += l;
-                    app.state.currentWordScore += (app.config.items[l].value * (app.state.currentWord.length + 1));
-                    $("#currentWord").innerHTML = app.state.currentWord + '[' + app.state.currentWordScore + ']';
-                    app.state.current.word.push(l);
-                    app.state.current.cells.push(e.target);
-                    app.state.current.used.push(key);
-                }
-            }
+//            if (e.target.id.match(/^letter/)) {
+                app.state.overTimeout = setTimeout(function() { app.addCell(e.target); }, 200);
+                app.state.lineTimeout = setTimeout(function() { app.newSegment(e.target, e.clientX, e.clientY); }, 1000);
+//            }
 
         },
-        getLetters: function(startcell, endcell) {
-            let [y1, x1] = startcell.split(/\D/).slice(1);
-            let [y2, x2] = endcell.split(/\D/).slice(1);
-            x1 = parseInt(x1); x2 = parseInt(x2); y1 = parseInt(y1); y2 = parseInt(y2); 
+        newSegment: function(cell, x, y) {
+            app.state.lastPos = {
+                x: x,
+                y: y
+            };
+            let line = app.mkLine(x + 5, y + 5);
+            
+        },
+        addCell: function(cell) {
+            const key = cell.id.replace(/^letter_/, '');
+            const coords = app.getCoord(cell.id);
 
-            let xi = (x1 > x2) ? -1 : 1;
-            let yi = (y1 > y2) ? -1 : 1;
-            let out = '', cnt = 0;
-            for (let c=x1; c!=x2; c += xi) {
-                for (let r=y1; r!=y2; r+= yi) {
-                    out += app.state.board[r][c];
-                    cnt++;
-
-                    if (cnt > 25) {
-                        console.log("Too many letters.  Broken loop?");
-                        break;
-                    }
-                }
+            if (!app.state.current.used.includes(key)) {
+                let ltr = app.state.board[coords.y][coords.x];
+                console.log("Adding " + ltr + " to word [" + app.state.currentWord + "]");
+                app.state.currentWord += ltr;
+                app.state.currentWordScore += (app.config.items[ltr].value * (app.state.currentWord.length + 1));
+                $("#currentWord").innerHTML = app.state.currentWord + '[' + app.state.currentWordScore + ']';
+                app.state.current.word.push(ltr);
+                app.state.current.cells.push(cell);
+                app.state.current.used.push(key);
             }
+             
+        },
+        getLetters: function() {
+            let out = '';
+
+            app.state.current.cells.forEach(function(item) { 
+                const [r, c] = item.id.replace(/^letter_/,'').split(/\D/).splice(1);
+                out += app.state.board[r][c];
+            });
+
             return out;
         },
         shuffle: function(array) {

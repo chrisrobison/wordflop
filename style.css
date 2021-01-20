@@ -140,6 +140,7 @@ h2 {
     z-index: 4001;
     border: 3px solid #fff;
     border-radius: 25px;
+    pointer-events: none;
 }
 @keyframes bounce0 {
 
