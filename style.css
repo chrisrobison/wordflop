@@ -134,6 +134,10 @@ h2 {
     display:inline-block;
     width:5em;
 }
+
+.highlighted {
+    background-color:#999;
+}
 .line {
     transform-origin: 17px 17px;
     position:absolute;
