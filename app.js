@@ -7,6 +7,7 @@ function $$(str) {
 }
 
 (function() {
+    /** @type {*} */
     const app = {
         config: {
             scoreGoal: 300,
@@ -58,7 +59,6 @@ function $$(str) {
             app.fillBoard();
 
             $("#board").addEventListener("mousedown", app.doDown);
-//            $("#board").addEventListener("mouseover", app.doHighlight);
         },
         doHighlight: function(e) {
             const hl = $$(".highlighted");
@@ -68,8 +68,13 @@ function $$(str) {
             $(`#${id}`).classList.add('highlighted');
 
         },
+        /**
+         *  initLetters
+         * 
+         *  Create a pool of letters that is filled according to letter frequencies
+         *
+         **/
         initLetters: function() {
-            // Create a pool of letters that is filled according to letter frequencies
             let letterString = "";
 
             for (const [key, value] of Object.entries(app.config.items)) {
