@@ -67,6 +67,8 @@ aside {
     background-color: #000;
     font-family: "Roboto Mono", monospace;
     cursor: default;
+    border-right:1px solid #666;
+    border-bottom:1px solid #666;
 }
 
 .letter {
@@ -136,7 +138,7 @@ h2 {
 }
 
 .highlighted {
-    background-color:#999;
+    background-color:#666;
 }
 .line {
     transform-origin: 17px 17px;

@@ -53,11 +53,18 @@ function $$(str) {
                 app.state.dictionary = data;
             });
 
+            fetch("4-6letter.txt").then(response => response.text()).then(data => {
+                app.state.allwords = data.split(/\n/);
+                //console.dir(app.state.allwords);
+                app.saltBoard();
+                app.fillBoard();
+            });
+            
             app.initLetters();
 
             app.buildBoard();
-            app.fillBoard();
-
+//            app.fillBoard();
+            
             $("#board").addEventListener("mousedown", app.doDown);
         },
         doHighlight: function(e) {
@@ -85,7 +92,7 @@ function $$(str) {
             app.shuffle(app.state.letters);
             app.shuffle(app.state.letters);
             app.state.letterString = app.state.letters.join('');
-            console.log(app.state.letterString);
+            //console.log(app.state.letterString);
         },
         checkWord: function(word) {
             let d = app.state.dictionary;
@@ -103,7 +110,7 @@ function $$(str) {
                     }
                 }
             }
-            console.dir(d);
+            //console.dir(d);
             if (d['$']) {
                 return fullword;
             }
@@ -120,7 +127,7 @@ function $$(str) {
             };
         },
         getCell: function(x, y) {
-            console.log("getting cell: [" + x + "," + y + "]");
+            //console.log("getting cell: [" + x + "," + y + "]");
 
             let col = Math.floor(x / app.config.cellWidth);
             let row = Math.floor(y / app.config.cellHeight);
@@ -151,8 +158,12 @@ function $$(str) {
             let len = Math.sqrt((dx * dx) + (dy * dy));
 
             line.classList.add('line');
-            line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 19) + 'px';
-            line.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) - 19) + 'px';
+            
+           // line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 19) + 'px';
+            line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 22) + 'px';
+            
+           line.style.left = ((Math.floor(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) - 4 ) + 'px';
+            
             line.style.transform = `scale(-1) rotate(-${angle}deg)`;
             line.style.width = (len + app.config.cellWidth) + 'px';
             line.style.height = (app.config.cellHeight - 3) + "px";
@@ -178,6 +189,7 @@ function $$(str) {
                 x: e.clientX,
                 y: e.clientY
             };
+            console.dir(app.state.lastPos);
             //e.target.classList.add('selected');
             app.state.currentWord = app.state.board[coord.row][coord.col];
             $("#currentWord").innerHTML = app.state.currentWord;
@@ -187,8 +199,7 @@ function $$(str) {
             $("#board").addEventListener("mouseup", app.doUp);
             $("#board").addEventListener("mousemove", app.doMove);
             app.state.currentWordScore = app.config.items[app.state.board[coord.row][coord.col]].value;
-            ;
-            app.mkLine(e.clientX, e.clientY - 5);
+            app.mkLine(e.clientX, e.clientY);
         },
         doMove: function(e) {
             let dx, dy, theta, len;
@@ -199,25 +210,14 @@ function $$(str) {
             theta = 360 - (Math.atan2(dy, dx) * (180 / Math.PI));
 
             let angle = Math.round(theta / 45) * 45;
-            //l.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight)  ) + 'px';
-            //l.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) ) + 'px';
 
-            // let newwidth = Math.round(len / app.config.cellWidth) * app.config.cellWidth;
             if (app.state.current.lines[0]) {
                 app.state.current.lines[0].style.transform = `scaleX(-1) rotate(${angle}deg)`;
                 app.state.current.lines[0].style.width = len + app.config.cellWidth + 'px';
             }
-            /*
-            let cell = app.getCell(e.x, e.y);
-            let start = app.getCell(app.state.lastPos.x, app.state.lastPos.y);
-
-            let newword = app.getLetters(start.id, cell.id);
-            app.state.currentWord = newword;
-            $("#currentWord").innerHTML = newword;
-            */
         },
         doUp: function(e) {
-            console.log("mouseup");
+            //console.log("mouseup");
             clearTimeout(app.state.overTimeout);
             $("#board").removeEventListener("mouseover", app.doOver);
             $("#board").removeEventListener("mouseup", app.doUp);
@@ -225,15 +225,9 @@ function $$(str) {
             app.state.currentLine.remove();
 
             let cell = app.getCoord(e.target.id);
-            // app.getCell(e.x - (e.target.offsetLeft + e.target.offsetParent.offsetLeft), e.y);
-            let start = app.state.lastPos; // (app.state.lastPos.x, app.state.lastPos.y);
-            console.log("end cell:");
-            console.dir(cell);
-            console.log("start cell:");
-            console.dir(start);
-
+            let start = app.state.lastPos; 
             let newword = app.getLetters(start, cell);
-            console.log("newword: " + newword);
+            
             app.state.currentWord = newword;
             $("#currentWord").innerHTML = newword;
 
@@ -265,13 +259,13 @@ function $$(str) {
         doOver: function(e) {
             clearTimeout(app.state.overTimeout);
             //clearTimeout(app.state.lineTimeout);
-            console.log("doOver");
-            console.dir(e);
+            //console.log("doOver");
+            //console.dir(e);
             let tgt = e.target;
             let coords = app.getCoord(e.target.id);
 
             let newword = app.getLetters(app.state.lastPos, coords);
-            console.log("newword: " + newword);
+            //console.log("newword: " + newword);
             app.state.currentWord = newword;
             $("#currentWord").innerHTML = newword + ' [' + app.state.currentWordScore + ']';
         },
@@ -292,7 +286,7 @@ function $$(str) {
 
                 if (ltr) {
                     $(`#r${coords.row}c${coords.col}`).classList.add('selected');
-                    console.log("Adding " + ltr + " to word [" + app.state.currentWord + "]");
+                    //console.log("Adding " + ltr + " to word [" + app.state.currentWord + "]");
                     app.state.currentWord += ltr;
                     app.state.currentWordScore += (app.config.items[ltr].value * (app.state.currentWord.length + 1));
                     $("#currentWord").innerHTML = app.state.currentWord + '[' + app.state.currentWordScore + ']';
@@ -312,7 +306,7 @@ function $$(str) {
             if ((slope !== 0) && (Math.abs(slope) !== 1) && (Math.abs(slope) !== Infinity)) {
                 return app.state.currentWord;
             }
-            console.log(`getting letters from [${start.col},${start.row}] to [${end.col},${end.row}]`);
+            //console.log(`getting letters from [${start.col},${start.row}] to [${end.col},${end.row}]`);
             let r1 = parseInt(start.row),
                 c1 = parseInt(start.col),
                 r2 = parseInt(end.row),
@@ -333,12 +327,12 @@ function $$(str) {
                 app.state.currentWordScore += app.config.items[app.state.board[curRow][curCol]].value;
                 //app.addCell($(`#letter_r${curRow}c${curCol}`));
                 out += app.state.board[curRow][curCol];
-                console.log("[" + curRow + "," + curCol + "] " + out);
+                //console.log("[" + curRow + "," + curCol + "] " + out);
                 curRow += ri;
                 curCol += ci;
             }
-            console.log("cells");
-            console.dir(app.state.current.cells);
+            //console.log("cells");
+            //console.dir(app.state.current.cells);
 
             return out;
         },
@@ -354,9 +348,12 @@ function $$(str) {
                 x2 = 14,
                 xtra = "";
             const extra = ['ls-2x', 'ls-3x', 'ws-2x', 'ws-3x'];
+            app.state.board = [];
             for (let r = 0; r < app.config.rows; r++) {
                 out += "<div class='row'>";
+                app.state.board[r] = [];
                 for (let c = 0; c < app.config.cols; c++) {
+                    app.state.board[r][c] = '';
                     if ((x1 == c) || (x2 == c)) {
                         xtra = extra[2];
                     } else {
@@ -377,14 +374,139 @@ function $$(str) {
         },
         fillBoard: function() {
             for (let r = 0; r < app.config.rows; r++) {
-                app.state.board[r] = [];
+                if (!app.state.board[r]) app.state.board[r] = [];
                 for (let c = 0; c < app.config.cols; c++) {
-                    app.state.board[r][c] = app.state.letters[Math.floor(Math.random() * app.state.letters.length)];
-                    const el = app.mkletter(r, c, app.state.board[r][c]);
-                    $("#board").appendChild(el);
+                    if (!app.state.board[r][c]) {
+                        app.state.board[r][c] = app.state.letters[Math.floor(Math.random() * app.state.letters.length)];
+                        const el = app.mkletter(r, c, app.state.board[r][c]);
+                        $("#board").appendChild(el);
+                    }
                     // $(`#r${r}c${c}`).innerHTML = app.state.board[r][c];
                 }
             }
+        },
+        rand: function(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        },
+        checkBoard: function(from, to, word='') {
+//            console.log(`Checking board from [${from.col},${from.row}] to [${to.col},${to.row}]`);
+            
+            let curcol = from.col;
+            let currow = from.row;
+            let rowinc = (to.row == from.row) ? 0 : 1;
+            let colinc = (to.col == from.col) ? 0 : 1;
+
+            while ((curcol !== to.col) || (currow !== to.row)) {
+                if (app.state.board[currow][curcol]) {
+                    //console.log("Bailing on found letter " + app.state.board[currow][curcol]);
+                    return false;
+                }
+                curcol += colinc;
+                currow += rowinc;
+
+            }
+            
+            /*
+            for (let r=from.row; r<to.row; r++) {
+                for (let c=from.col; c<to.col; c++) {
+                    console.log(`r:${r} c:${c} board: ${app.state.board[r][c]}`);
+                    if (app.state.board[r][c].match(/./)) {
+                        console.log("Bailing on found letter " + app.state.board[r][c]);
+                        return false;
+                    }
+                }
+            }
+            */
+            return true;
+        },
+        saltBoard: function() {
+            let picks = [];
+            for (let i=0; i<12; i++) {
+                let word = app.state.allwords[app.rand(0, app.state.allwords.length)];
+                let pick = word.split('');
+
+                picks.push(word); 
+                let dir = app.rand(0, 3);
+                let r, c, cnt = 0, t = 0;
+                //console.log(`Picked ${pick}`);
+                
+                // 0=vertical 1=horizontal 2=diagonal 
+                if (dir === 0) {
+                    c = app.rand(0, app.config.cols);
+                    r = app.rand(0, app.config.rows - pick.length);
+                    
+                    while  (!app.checkBoard({row:r, col:c}, {row:r+pick.length, col:c}, word) && (t < 10)) {
+                        c = app.rand(0, app.config.cols);
+                        r = app.rand(0, app.config.rows - pick.length);
+                        t++;
+                    }
+                    //console.log("t: " + t);
+                    
+                    if (t < 10) {
+                        //console.log("placing vertically ["+c+","+r+"]");
+                        
+                        for (let x=r; x<pick.length+r; x++) {
+                            //console.log(`set [${c}, ${x}] to ${pick[cnt]}`);
+                            app.state.board[x][c] = pick[cnt];
+                            $("#board").appendChild(app.mkletter(x, c, pick[cnt]));
+                            cnt++;
+                        }
+                    } else {
+                        i--;
+                    }
+                } else if (dir === 1) {
+                    c = app.rand(0, app.config.cols - pick.length);
+                    r = app.rand(0, app.config.rows);
+                    
+                    while (!app.checkBoard({row:r, col:c}, {row:r, col:c+pick.length}, word) && (t < 10)) {
+                        c = app.rand(0, app.config.cols - pick.length);
+                        r = app.rand(0, app.config.rows);
+                        t++;
+                    }
+                    //console.log("t: " + t);
+                
+                    if (t < 10) {
+                        //console.log("placing horizontally ["+c+","+r+"]");
+                        for (let x=c; x<pick.length+c; x++) {
+                            //console.log(`set [${x}, ${r}] to ${pick[cnt]}`);
+                            app.state.board[r][x] = pick[cnt];
+                            $("#board").appendChild(app.mkletter(r, x, pick[cnt]));
+                            cnt++;
+                        }
+                    } else {
+                        i--;
+                    }
+ 
+                } else if (dir === 2) {
+                    c = app.rand(0, app.config.cols - pick.length);
+                    r = app.rand(0, app.config.rows - pick.length);
+                    
+                    while (!app.checkBoard({row:r, col:c}, {row:r+pick.length, col:c+pick.length}, word) && (t<10)) {
+                        c = app.rand(0, app.config.cols - pick.length);
+                        r = app.rand(0, app.config.rows - pick.length);
+                        t++;
+                    }
+                    //console.log("t: " + t);
+
+                    if (t < 10) { 
+                        //console.log("placing diagonally ["+c+","+r+"]");
+                    
+                        for (let x=c; x<pick.length+c; x++) {
+                            //console.log(`set [${x}, ${r}] to ${pick[cnt]}`);
+                            app.state.board[r][x] = pick[cnt];
+                            $("#board").appendChild(app.mkletter(r, x, pick[cnt]));
+                            cnt++;
+                            r++;
+                        }
+                    } else {
+                        i--;
+                    }
+ 
+                }
+            }
+            //console.dir(picks);
+            app.state.picks = picks;
+
         },
         dropCells: function() {
             for (let c = 0; c < app.config.cols; c++) {
@@ -455,8 +577,8 @@ function $$(str) {
             }
         },
         gotWord: function(word) {
-            console.log("gotWord: "+word);
-            console.dir(app.state.current.cells);
+            //console.log("gotWord: "+word);
+            //console.dir(app.state.current.cells);
             if (!word) return false;
             app.state.players[app.state.currentPlayer].words.push(word);
             app.state.players[app.state.currentPlayer].scores.push(app.state.currentWordScore);
@@ -467,8 +589,8 @@ function $$(str) {
 
             app.state.current.cells.forEach((item) => {
                 let c = app.getCoord(item.id);
-                console.dir(c);
-                console.dir(item);
+                //console.dir(c);
+                //console.dir(item);
 
                 app.state.board[c.row][c.col] = '';
                 // item.parentElement.removeChild(item);
@@ -498,6 +620,9 @@ function $$(str) {
 
         },
         mkletter: function(row = 0, col = 0, letter = '') {
+            let oldel = $(`letter_r${row}c${col}`);
+            if (oldel) oldel.remove();
+
             let el = document.createElement('div');
             el.id = `letter_r${row}c${col}`;
             el.className = 'letter';
@@ -510,15 +635,22 @@ function $$(str) {
             return el;
         },
         dumpBoard: function() {
-            let out = '';
-            for (let r = 0; r < app.config.rows; r++) {
+            let out = '',cols = '   ';
 
+            
+            for (let r = 0; r < app.config.rows; r++) {
+                let sr = (r < 10) ? ' ' + r : r;
+                out += sr + ' ';
                 for (let c = 0; c < app.config.cols; c++) {
-                    out += app.state.board[r][c];
+                    if (r===0) {
+                        cols += c.toString().slice(-1);
+                    }
+                    out += app.state.board[r][c] || '-';
                 }
+                if (r ===0) out = cols + "\n" + out;
                 out += "\n";
             }
-            console.log(out);
+            //console.log(out);
         }
 
     }
