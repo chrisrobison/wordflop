@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+            background-color:#111;
+            color#eee;
+        }
+
+        main {
+            color: #eee;
+            position:relative;
+            background-color:#333;
+            border: 2em inset #eee;
+        }
+
+        use {
+            transition: all 250ms linear;
+            cursor: pointer;
+            fill: #ccc;
+        }
+        
+        .pod-wrap use:hover {
+            fill: #fff9;
+        }
+
+        svg {
+            width: 600px;
+            flex: 1;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 0;
+            height: 100vh;
+            font-weight: 700;
+            font-family: sans-serif;
+        }
+
+        a {
+            color: #ccc;
+            padding: 10px;
+            text-decoration: none;
+            transition: color 0.4s;
+        }
+
+        a:hover {
+            color: #333;
+        }
+        #board {
+            filter: drop-shadow(2px 2px 2px #000a);
+        }
+        .letter {
+            position:absolute; 
+            width: 50px;
+            height:50px;
+            font-size:24px;
+            color:#000;
+            text-align:center;
+            border-radius:50%;
+            padding-top:10px;
+            transition:all 200ms ease-in-out;
+            cursor:pointer;
+        }
+        .letter:hover { background-color:#fff; box-sizing: border-box; border-radius:50%; }
+    </style>
+</head>
+
+<body id="home">
+    <main>
+
+        <svg viewBox="0 0 200 200">
+            <defs>
+                <filter id="dropshadow" height="130%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="0" /> <!-- stdDeviation is how much to blur -->
+                    <feOffset dx=".5" dy=".5" result="offsetblur" /> <!-- how much to offset -->
+                    <feComponentTransfer>
+                        <feFuncA type="linear" slope="0.75" /> <!-- slope is the opacity of the shadow -->
+                    </feComponentTransfer>
+                    <feMerge>
+                        <feMergeNode /> <!-- this contains the offset blurred image -->
+                        <feMergeNode in="SourceGraphic" /> <!-- this contains the element that the filter is applied to -->
+                    </feMerge>
+                </filter>
+                <g id="pod">
+                    <polygon stroke="#000" stroke-width="0.5" points="5,-9 -5,-9 -10,0 -5,9 5,9 10,0" />
+                </g>
+            </defs>
+
+            <g id='board' class="pod-wrap"> </g>
+        </svg>
+    </main>
+    <script>
+        function $(str) {
+            return document.querySelector(str);
+        }
+
+        function $$(str) {
+            return document.querySelectorAll(str);
+        }
+
+        (function() {
+            const app = {
+                init: function() {
+                    $("#board").addEventListener('mouseover', function(e) {
+                        console.dir(e);
+                    });
+
+                    app.state.loaded = true;
+                    let move = [10, 1];
+                    let board = $("#board");
+                    let out = "";
+                    for (let y = 0; y < 10; y++) {
+                        for (let x = 0; x < 12; x++) {
+                            let ty = y * 18;
+                            ty = ty + move[x % 2] + 15;
+                            let tx = (x * 15) + 15;
+                            let col = (y % 2) + x;
+                            out += "<use id='r" + y + "c" + col + "' href='#pod' transform='translate(" + tx + "," + ty + ")'/>";
+                        }
+                    }
+                    board.innerHTML = out;
+
+                    out = '';
+                    for (let y = 0; y < 10; y++) {
+                        for (x = 0; x < 12; x++) {
+                            let top = (y * 54) + (((x + 1) % 2) * 28) + 22;
+                            out += `<div id='r${y}c${x}' class="letter" style="top:${top}px;left:${(x*45) + 20}px;">${app.getLetter()}</div>`;
+                        }
+                    }
+                    $("main").innerHTML += out;
+
+                },
+                getLetter: function() {
+                    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+                    return letters[Math.floor(Math.random() * 26)];
+                },
+                state: {
+                    loaded: false
+                }
+            }
+            window.app = app;
+            app.init();
+        })();
+    </script>
+</body>
+
+</html>
