@@ -318,13 +318,14 @@ function $$(str) {
             if (r1 == r2) ri = 0;
             if (c1 == c2) ci = 0;
             let curRow = r1,
-                curCol = c1;
+                curCol = c1, cnt = 1;
             app.state.current.cells = [];
             app.state.currentWordScore = 0;
 
             while ((curRow != r2 + ri) || (curCol != c2 + ci)) {
                 app.state.current.cells.push($(`#letter_r${curRow}c${curCol}`));
-                app.state.currentWordScore += app.config.items[app.state.board[curRow][curCol]].value;
+                app.state.currentWordScore += (app.config.items[app.state.board[curRow][curCol]].value * cnt);
+                cnt++;
                 //app.addCell($(`#letter_r${curRow}c${curCol}`));
                 out += app.state.board[curRow][curCol];
                 //console.log("[" + curRow + "," + curCol + "] " + out);
@@ -380,8 +381,8 @@ function $$(str) {
                         app.state.board[r][c] = app.state.letters[Math.floor(Math.random() * app.state.letters.length)];
                         const el = app.mkletter(r, c, app.state.board[r][c]);
                         $("#board").appendChild(el);
+                        app.flipLetter(el, app.state.board[r][c], 10 + app.rand(0, 250));
                     }
-                    // $(`#r${r}c${c}`).innerHTML = app.state.board[r][c];
                 }
             }
         },
@@ -389,7 +390,6 @@ function $$(str) {
             return Math.floor(Math.random() * (max - min)) + min;
         },
         checkBoard: function(from, to, word='') {
-//            console.log(`Checking board from [${from.col},${from.row}] to [${to.col},${to.row}]`);
             
             let curcol = from.col;
             let currow = from.row;
@@ -398,7 +398,6 @@ function $$(str) {
 
             while ((curcol !== to.col) || (currow !== to.row)) {
                 if (app.state.board[currow][curcol]) {
-                    //console.log("Bailing on found letter " + app.state.board[currow][curcol]);
                     return false;
                 }
                 curcol += colinc;
@@ -406,17 +405,6 @@ function $$(str) {
 
             }
             
-            /*
-            for (let r=from.row; r<to.row; r++) {
-                for (let c=from.col; c<to.col; c++) {
-                    console.log(`r:${r} c:${c} board: ${app.state.board[r][c]}`);
-                    if (app.state.board[r][c].match(/./)) {
-                        console.log("Bailing on found letter " + app.state.board[r][c]);
-                        return false;
-                    }
-                }
-            }
-            */
             return true;
         },
         saltBoard: function() {
@@ -427,8 +415,7 @@ function $$(str) {
 
                 picks.push(word); 
                 let dir = app.rand(0, 3);
-                let r, c, cnt = 0, t = 0;
-                //console.log(`Picked ${pick}`);
+                let r, c, cnt = 0, t = 0, el;
                 
                 // 0=vertical 1=horizontal 2=diagonal 
                 if (dir === 0) {
@@ -448,7 +435,8 @@ function $$(str) {
                         for (let x=r; x<pick.length+r; x++) {
                             //console.log(`set [${c}, ${x}] to ${pick[cnt]}`);
                             app.state.board[x][c] = pick[cnt];
-                            $("#board").appendChild(app.mkletter(x, c, pick[cnt]));
+                            el = app.mkletter(x, c, pick[cnt]);
+                            $("#board").appendChild(el);
                             cnt++;
                         }
                     } else {
@@ -470,7 +458,9 @@ function $$(str) {
                         for (let x=c; x<pick.length+c; x++) {
                             //console.log(`set [${x}, ${r}] to ${pick[cnt]}`);
                             app.state.board[r][x] = pick[cnt];
-                            $("#board").appendChild(app.mkletter(r, x, pick[cnt]));
+                            el = app.mkletter(r, x, pick[cnt]);
+                            $("#board").appendChild(el);
+                            app.flipLetter(el, pick[cnt], 10 + app.rand(0, 200));
                             cnt++;
                         }
                     } else {
@@ -494,7 +484,9 @@ function $$(str) {
                         for (let x=c; x<pick.length+c; x++) {
                             //console.log(`set [${x}, ${r}] to ${pick[cnt]}`);
                             app.state.board[r][x] = pick[cnt];
-                            $("#board").appendChild(app.mkletter(r, x, pick[cnt]));
+                            el = app.mkletter(r, x, pick[cnt]);
+                            $("#board").appendChild(el);
+                            app.flipLetter(el, pick[cnt], 10 + app.rand(0,200));
                             cnt++;
                             r++;
                         }
@@ -589,9 +581,6 @@ function $$(str) {
 
             app.state.current.cells.forEach((item) => {
                 let c = app.getCoord(item.id);
-                //console.dir(c);
-                //console.dir(item);
-
                 app.state.board[c.row][c.col] = '';
                 // item.parentElement.removeChild(item);
             });
@@ -604,6 +593,7 @@ function $$(str) {
             elClone.style.top = "100%";
             elClone.style.left = "50%";
             $("#board").appendChild(elClone);
+            $("#currentWord").innerHTML = "";
             elClone.addEventListener('transitionend', function(e) {
                 elClone.remove();
             });
@@ -651,9 +641,21 @@ function $$(str) {
                 out += "\n";
             }
             //console.log(out);
+        },
+        flipLetter: function(el, ltr, cnt=0) {
+            cnt--;
+            if (cnt <= 0) {
+                el.innerHTML = ltr;
+                return true;
+            } else {
+                let tmpltr = String.fromCharCode(app.rand(65, 90));
+                el.innerHTML = tmpltr;
+                setTimeout(app.flipLetter, 30, el, ltr, cnt);
+            }
         }
 
-    }
+    };
+    
     window.app = app;
     app.init();
 })();
