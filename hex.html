@@ -21,15 +21,11 @@
         }
 
         use {
-            transition: all 250ms linear;
+            transition: all 150ms linear;
             cursor: pointer;
             fill: #ccc;
         }
         
-        .pod-wrap use:hover {
-            fill: #fff9;
-        }
-
         svg {
             width: 600px;
             flex: 1;
@@ -70,6 +66,17 @@
             padding-top:10px;
             transition:all 200ms ease-in-out;
             cursor:pointer;
+        }
+        .letter:after {
+            display:inline-block;
+            height:50px;
+            width:50px;
+            border-radius:50%;
+            position:relative;
+            content: " ";
+            top:-38px;
+            left:0px;
+
         }
         .letter:hover { background-color:#fff; box-sizing: border-box; border-radius:50%; }
     </style>

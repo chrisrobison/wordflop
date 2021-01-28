@@ -63,8 +63,9 @@ function $$(str) {
             app.initLetters();
 
             app.buildBoard();
-//            app.fillBoard();
-            
+            app.fillBoard();
+            // app.makeTimer(10);
+
             $("#board").addEventListener("mousedown", app.doDown);
         },
         doHighlight: function(e) {
@@ -139,6 +140,46 @@ function $$(str) {
             };
             return out;
         },
+        makeTimer: function(amt) {
+            let pie = $("#pie");
+
+            let p = parseFloat(amt),
+                NS = "http://www.w3.org/2000/svg",
+                svg = document.createElementNS(NS, "svg"),
+                circle = document.createElementNS(NS, "circle"),
+                circle2 = document.createElementNS(NS, "circle"),
+                circle3 = document.createElementNS(NS, "circle"),
+                title = document.createElementNS(NS, "title");
+            svg.setAttribute("class", "timer");
+            svg.setAttribute("id", "countdown");
+
+            circle3.setAttribute("r", 16);
+            circle3.setAttribute("id", "second");
+            circle3.setAttribute("cx", 16);
+            circle3.setAttribute("cy", 16);
+            circle3.setAttribute("stroke-dasharray", "0 100");
+
+            circle2.setAttribute("r", 16);
+            circle2.setAttribute("id", "groove");
+            circle2.setAttribute("cx", 16);
+            circle2.setAttribute("cy", 16);
+            circle2.setAttribute("stroke-dasharray", "0 100");
+
+            circle.setAttribute("r", 16);
+            circle.setAttribute("id", "timer");
+            circle.setAttribute("cx", 16);
+            circle.setAttribute("cy", 16);
+            circle.setAttribute("stroke-dasharray", "0 100");
+
+            svg.setAttribute("viewBox", "0 0 32 32");
+            title.textContent = amt;
+            svg.appendChild(title);
+            svg.appendChild(circle3);
+            svg.appendChild(circle2);
+            svg.appendChild(circle);
+            pie.appendChild(svg);
+            setTimeout(function() { circle.setAttribute("stroke-dasharray", "100 100"); }, 500);
+        },
         mkLine: function(x, y) {
             app.state.current.lines.push(app.state.currentLine);
 
@@ -162,7 +203,7 @@ function $$(str) {
            // line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 19) + 'px';
             line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 22) + 'px';
             
-           line.style.left = ((Math.floor(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) - 4 ) + 'px';
+           line.style.left = ((Math.floor(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) -10) + 'px';
             
             line.style.transform = `scale(-1) rotate(-${angle}deg)`;
             line.style.width = (len + app.config.cellWidth) + 'px';
@@ -381,7 +422,7 @@ function $$(str) {
                         app.state.board[r][c] = app.state.letters[Math.floor(Math.random() * app.state.letters.length)];
                         const el = app.mkletter(r, c, app.state.board[r][c]);
                         $("#board").appendChild(el);
-                        app.flipLetter(el, app.state.board[r][c], 10 + app.rand(0, 250));
+                        app.flipLetter(el, app.state.board[r][c], 10 + app.rand(0, 100));
                     }
                 }
             }
@@ -415,86 +456,56 @@ function $$(str) {
 
                 picks.push(word); 
                 let dir = app.rand(0, 3);
-                let r, c, cnt = 0, t = 0, el;
+                let r, c, t = 0, el;
                 
-                // 0=vertical 1=horizontal 2=diagonal 
-                if (dir === 0) {
-                    c = app.rand(0, app.config.cols);
-                    r = app.rand(0, app.config.rows - pick.length);
-                    
-                    while  (!app.checkBoard({row:r, col:c}, {row:r+pick.length, col:c}, word) && (t < 10)) {
-                        c = app.rand(0, app.config.cols);
-                        r = app.rand(0, app.config.rows - pick.length);
-                        t++;
-                    }
-                    //console.log("t: " + t);
-                    
-                    if (t < 10) {
-                        //console.log("placing vertically ["+c+","+r+"]");
-                        
-                        for (let x=r; x<pick.length+r; x++) {
-                            //console.log(`set [${c}, ${x}] to ${pick[cnt]}`);
-                            app.state.board[x][c] = pick[cnt];
-                            el = app.mkletter(x, c, pick[cnt]);
-                            $("#board").appendChild(el);
-                            cnt++;
-                        }
-                    } else {
-                        i--;
-                    }
-                } else if (dir === 1) {
-                    c = app.rand(0, app.config.cols - pick.length);
-                    r = app.rand(0, app.config.rows);
-                    
-                    while (!app.checkBoard({row:r, col:c}, {row:r, col:c+pick.length}, word) && (t < 10)) {
-                        c = app.rand(0, app.config.cols - pick.length);
-                        r = app.rand(0, app.config.rows);
-                        t++;
-                    }
-                    //console.log("t: " + t);
+                let clen = pick.length, rlen = pick.length;
+                let cinc = 1, rinc = 1;
                 
-                    if (t < 10) {
-                        //console.log("placing horizontally ["+c+","+r+"]");
-                        for (let x=c; x<pick.length+c; x++) {
-                            //console.log(`set [${x}, ${r}] to ${pick[cnt]}`);
-                            app.state.board[r][x] = pick[cnt];
-                            el = app.mkletter(r, x, pick[cnt]);
-                            $("#board").appendChild(el);
-                            app.flipLetter(el, pick[cnt], 10 + app.rand(0, 200));
-                            cnt++;
-                        }
-                    } else {
-                        i--;
-                    }
- 
-                } else if (dir === 2) {
-                    c = app.rand(0, app.config.cols - pick.length);
-                    r = app.rand(0, app.config.rows - pick.length);
-                    
-                    while (!app.checkBoard({row:r, col:c}, {row:r+pick.length, col:c+pick.length}, word) && (t<10)) {
-                        c = app.rand(0, app.config.cols - pick.length);
-                        r = app.rand(0, app.config.rows - pick.length);
-                        t++;
-                    }
-                    //console.log("t: " + t);
+                switch (dir) {
 
-                    if (t < 10) { 
-                        //console.log("placing diagonally ["+c+","+r+"]");
-                    
-                        for (let x=c; x<pick.length+c; x++) {
-                            //console.log(`set [${x}, ${r}] to ${pick[cnt]}`);
-                            app.state.board[r][x] = pick[cnt];
-                            el = app.mkletter(r, x, pick[cnt]);
-                            $("#board").appendChild(el);
-                            app.flipLetter(el, pick[cnt], 10 + app.rand(0,200));
-                            cnt++;
-                            r++;
-                        }
-                    } else {
-                        i--;
-                    }
- 
+                    case 0:
+                        clen = cinc = 0;
+                        rlen = pick.length;
+                        rinc = 1;
+                        break;
+                    case 1:
+                        clen = pick.length;
+                        cinc = 1;
+                        rlen = rinc = 0;
+                        break;
+                    case 2:
+                        clen = pick.length;
+                        rlen = pick.length;
+                        cinc = 1;
+                        rinc = 1;
+                        break;
+                    default:
+                        clen = pick.length;
+                        rlen = rinc = 0;
+                        cinc = 1;
                 }
+
+                do { 
+                    c = app.rand(0, app.config.cols - clen);
+                    r = app.rand(0, app.config.rows - rlen);
+                    t++;
+                } while (!app.checkBoard( { row: r, col: c }, { row: r + rlen, col: c + clen }, word) && (t<10) );
+
+                if (t < 10) { 
+                    for (let i = 0; i < pick.length; i++) {
+                        app.state.board[r][c] = pick[i];
+                        //console.log(`set [${x}, ${r}] to ${pick[cnt]}`);
+                        el = app.mkletter(r, c, pick[i]);
+                        $("#board").appendChild(el);
+                        app.flipLetter(el, pick[i], 10 + app.rand(0,100));
+                        c += cinc;
+                        r += rinc;
+                    }
+                } else {
+                    i--;
+                }
+ 
+ 
             }
             //console.dir(picks);
             app.state.picks = picks;

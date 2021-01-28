@@ -17,7 +17,7 @@ nav {
     display: inline-block;
     width: 15em;
     float: left;
-    position:relative;
+    position: relative;
 }
 
 main {
@@ -49,7 +49,7 @@ section>* {
 aside {
     text-align: center;
     width: 15em;
-    position:relative;
+    position: relative;
 }
 
 .row {
@@ -67,8 +67,8 @@ aside {
     background-color: #000;
     font-family: "Roboto Mono", monospace;
     cursor: default;
-    border-right:1px solid #666;
-    border-bottom:1px solid #666;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
 }
 
 .letter {
@@ -103,51 +103,58 @@ aside {
 }
 
 .player0 nav .arrow {
-     animation: bounce0 2s infinite;
-     right:0px;
-     display:inline-block;
+    animation: bounce0 2s infinite;
+    right: 0px;
+    display: inline-block;
 }
+
 .player1 aside .arrow {
-     animation: bounce1 2s infinite;
-    left:0px;
-     display:inline-block;
+    animation: bounce1 2s infinite;
+    left: 0px;
+    display: inline-block;
 }
+
 #currentWord {
-    font-family: "Roboto Mono",monospace;
-    font-size:32px;
+    font-family: "Roboto Mono", monospace;
+    font-size: 32px;
 }
+
 .currentWord {
-    position:absolute;
-    bottom:1em;
-    transition:all 500ms ease-in-out;
+    position: absolute;
+    bottom: 1em;
+    transition: all 500ms ease-in-out;
 }
+
 .words {
-    height:88%;
-    overflow:scroll;
-    background-color:#555;
+    height: 88%;
+    overflow: scroll;
+    background-color: #555;
 }
-h2 { 
-    margin:0; 
-    display:inline-block;
-    width:5em;
+
+h2 {
+    margin: 0;
+    display: inline-block;
+    width: 5em;
 }
 
 .score {
-    display:inline-block;
-    width:5em;
+    display: inline-block;
+    width: 5em;
 }
 
 .highlighted {
-    background-color:#666;
+    background-color: #666;
 }
+
 .line {
     transform-origin: 17px 17px;
-    position:absolute;
+    position: absolute;
     z-index: 4001;
     border: 3px solid #fff;
     border-radius: 25px;
     pointer-events: none;
 }
+
 @keyframes bounce0 {
 
     0%,
@@ -185,6 +192,68 @@ h2 {
         transform: translateX(10px) rotate(-90deg);
     }
 }
+
+svg#countdown {
+    width: 100px;
+    height: 100px;
+    transform: rotate(-90deg);
+    background: #09f;
+    border-radius: 50%;
+}
+
+circle#groove {
+    stroke: #d00;
+    fill: transparent;
+    stroke-width: 6;
+    stroke-dasharray: 100 100;
+}
+
+circle#timer {
+    stroke: #ccc;
+    fill: transparent;
+    stroke-width: 6;
+    stroke-dasharray: 0 100;
+    animation: fillup 12s linear infinite 1s;
+    /* for 38% */
+}
+
+circle#second {
+    stroke: #ff0;
+    fill: transparent;
+    stroke-width: 7;
+    stroke-dash-array: 0 100;
+    animation: second 1s linear infinite alternate 1s;
+}
+
+#pie {
+    position:absolute;
+
+}
+@keyframes second {
+    0% {
+        stroke-dasharray: 100 100;
+    }
+
+    100% {
+        stroke-dasharray: 0 100;
+    }
+}
+
+@keyframes fillup {
+    0% {
+        stroke-dasharray: 100 100;
+    }
+
+    90% {
+        stroke-dasharray: 0 100;
+    }
+
+    100% {
+        stroke-dasharray: 100 100;
+    }
+}
+
+
 /*
 .ls-2x {
     background-color:#369a;

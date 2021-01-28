@@ -1,0 +1,152 @@
+<html>
+
+<head>
+    <title>Round countdown timer</title>
+    <style>
+        svg.timer {
+            width: 100px;
+            height: 100px;
+            transform: rotate(-90deg);
+            background: #09f;
+            border-radius: 50%;
+        }
+
+        circle#groove {
+            stroke: #d00;
+            fill: transparent;
+            stroke-width: 6;
+            stroke-dasharray: 100 100;
+        }
+        circle#timer {
+            stroke: #ccc;
+            fill: transparent;
+            stroke-width: 6;
+            stroke-dasharray: 0 100;
+            animation: fillup 12s linear infinite 1s;
+            /* for 38% */
+        }
+        circle#second {
+            stroke: #ff0;
+            fill: transparent;
+            stroke-width: 7;
+            stroke-dash-array: 0 100;
+            animation: second 1s linear infinite alternate 1s;
+        }
+        #stopwatch {
+            font-family: "Helvetica Neue","Helvetica","Arial",sans-serif;
+            font-size:48px;
+            color:#fff;
+            position:absolute;
+            z-index:999; 
+            text-align:center;
+            width:100px;
+            height:80px;
+            margin-top:20px;
+        }
+        #stopwatch::after {
+            display:inline-block;
+            position:relative;
+            width:2em;
+            height:2em;
+            content: "0";
+            animation: countdown 12s linear infinite 1s;
+            
+        }
+        @keyframes second {
+            0% { stroke-dasharray: 100 100; }
+            100% { stroke-dasharray: 0 100; }
+        }
+        @keyframes fillup {
+            0% { stroke-dasharray: 100 100; }
+            90% { stroke-dasharray: 0 100; }
+            100% { stroke-dasharray: 100 100; }
+        }
+        @keyframes countdown {
+            0% { content: "10"; }
+            10% { content: "9"; }
+            20% { content: "8"; }
+            30% { content: "7"; }
+            40% { content: "6"; }
+            50% { content: "5"; }
+            60% { content: "4"; }
+            70% { content: "3"; }
+            80% { content: "2"; }
+            90% { content: "1"; }
+            100% { content: "0"; }
+        
+        }
+    </style>
+</head>
+
+<body>
+    <div id='stopwatch'></div>
+    <script>
+        function $(str) { return document.querySelector(str); }
+        function $$(str) { return document.querySelectorAll(str); }
+        (function() {
+            const app = {
+                init: function() {
+                    app.makeTimer(0);
+                },
+                state: {
+                    timers: []
+                },
+                pauseTimer: function() {
+
+                },
+                makeTimer: function(amt) {
+                    let pie = document.createElement('div');
+                    pie.className = 'pie';
+                    pie.id = 'pie';
+                    $("body").appendChild(pie);
+
+                    let p = parseFloat(amt),
+                        NS = "http://www.w3.org/2000/svg",
+                        svg = document.createElementNS(NS, "svg"),
+                        circle = document.createElementNS(NS, "circle"),
+                        circle2 = document.createElementNS(NS, "circle"),
+                        circle3 = document.createElementNS(NS, "circle"),
+                        title = document.createElementNS(NS, "title");
+                    
+                    circle3.setAttribute("r", 16);
+                    circle3.setAttribute("id", "second");
+                    circle3.setAttribute("cx", 16);
+                    circle3.setAttribute("cy", 16);
+                    circle3.setAttribute("stroke-dasharray", "0 100");
+
+                    circle2.setAttribute("r", 16);
+                    circle2.setAttribute("id", "groove");
+                    circle2.setAttribute("cx", 16);
+                    circle2.setAttribute("cy", 16);
+                    circle2.setAttribute("stroke-dasharray", "0 100");
+
+                    circle.setAttribute("r", 16);
+                    circle.setAttribute("id", "timer");
+                    circle.setAttribute("cx", 16);
+                    circle.setAttribute("cy", 16);
+                    circle.setAttribute("stroke-dasharray", "0 100");
+
+                    svg.setAttribute("viewBox", "0 0 32 32");
+                    title.textContent = amt;
+                    pie.textContent = "";
+                    svg.appendChild(title);
+                    svg.appendChild(circle3);
+                    svg.appendChild(circle2);
+                    svg.appendChild(circle);
+                    pie.appendChild(svg);
+                    setTimeout(function() { circle.setAttribute("stroke-dasharray", "100 100"); }, 500);
+                },
+                updateTimer: function() {
+                    let a = $("#timer").getAnimations();
+console.dir(a);
+                
+                    $("#groove").setAttribute('stroke-dasharray', "100 100");
+                }
+                        };
+            window.app = app;
+            app.init();
+        })();
+    </script>
+</body>
+
+</html>
