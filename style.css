@@ -129,8 +129,14 @@ aside {
     height: 88%;
     overflow: scroll;
     background-color: #555;
+    column-count: 2;
+    padding-top:1em;
 }
 
+.found {
+    text-align:right;
+    padding-right:1em;
+}
 h2 {
     margin: 0;
     display: inline-block;

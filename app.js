@@ -49,8 +49,11 @@ function $$(str) {
         },
         init: function() {
             app.state.loaded = true;
+            app.initLetters();
+            app.buildBoard();
             fetch("all.js").then(response => response.json()).then(data => {
                 app.state.dictionary = data;
+                app.findWords();
             });
 
             fetch("4-6letter.txt").then(response => response.text()).then(data => {
@@ -60,13 +63,39 @@ function $$(str) {
                 app.fillBoard();
             });
             
-            app.initLetters();
-
-            app.buildBoard();
-            app.fillBoard();
+            //app.fillBoard();
             // app.makeTimer(10);
 
             $("#board").addEventListener("mousedown", app.doDown);
+            $("#player0Words").addEventListener("mouseover", app.highlightWord);
+        },
+        highlightWord: function(e) {
+            if (e.target.id.match(/^word/)) {
+                const hl = $$(".highlighted");
+                hl.forEach(item => item.classList.remove('highlighted'));
+                let parts = e.target.id.split(/\-/);
+                let start = app.getCoord(parts[1]);
+                let end = app.getCoord(parts[2]);
+
+                let r1 = parseInt(start.row),
+                    c1 = parseInt(start.col),
+                    r2 = parseInt(end.row),
+                    c2 = parseInt(end.col);
+
+                let ri = (r1 == r2) ? 0 : ((r1 > r2) ? -1 : 1);
+                let ci = (c1 == c2) ? 0 : ((c1 > c2) ? -1 : 1);
+
+                if (r1 == r2) ri = 0;
+                if (c1 == c2) ci = 0;
+                let curRow = r1,
+                    curCol = c1, cnt = 1;
+
+                while ((curRow != r2 ) || (curCol != c2 )) {
+                    $(`#letter_r${curRow}c${curCol}`).classList.add('highlighted');
+                    curRow += ri;
+                    curCol += ci;
+                }
+            } 
         },
         doHighlight: function(e) {
             const hl = $$(".highlighted");
@@ -201,9 +230,9 @@ function $$(str) {
             line.classList.add('line');
             
            // line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 19) + 'px';
-            line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 22) + 'px';
+            line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 20) + 'px';
             
-           line.style.left = ((Math.floor(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) -10) + 'px';
+           line.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) -14) + 'px';
             
             line.style.transform = `scale(-1) rotate(-${angle}deg)`;
             line.style.width = (len + app.config.cellWidth) + 'px';
@@ -489,7 +518,7 @@ function $$(str) {
                     c = app.rand(0, app.config.cols - clen);
                     r = app.rand(0, app.config.rows - rlen);
                     t++;
-                } while (!app.checkBoard( { row: r, col: c }, { row: r + rlen, col: c + clen }, word) && (t<10) );
+                } while (!app.checkBoard( { row: r, col: c }, { row: r + rlen, col: c + clen }, word) && (t<100) );
 
                 if (t < 10) { 
                     for (let i = 0; i < pick.length; i++) {
@@ -503,6 +532,7 @@ function $$(str) {
                     }
                 } else {
                     i--;
+                    picks.pop();
                 }
  
  
@@ -663,6 +693,83 @@ function $$(str) {
                 el.innerHTML = tmpltr;
                 setTimeout(app.flipLetter, 30, el, ltr, cnt);
             }
+        },
+        findWord: function(row, col, rowInc=1, colInc=1) {
+            let r = row, 
+                c = col, 
+                point = app.state.dictionary,
+                tmpword = '', words = [];
+            
+            while ((r > 0) && (r < app.config.rows) && (c > 0) && (c < app.config.cols)) {
+                if (point[app.state.board[r][c]]) {
+                    tmpword += app.state.board[r][c];
+                    point = point[app.state.board[r][c]];
+                } else if (point['$']) {
+                    if (tmpword.length > 3) {
+                        words.push({word:tmpword, start: `r${row}c${col}`, end: `r${r}c${c}`, dir: `${rowInc}:${colInc}`});
+                        console.log("Found word: "+tmpword);
+                    }
+
+                    tmpword = '';
+                    point = app.state.dictionary;
+                    break;
+                } else {
+                    tmpword = '';
+                    point = app.state.dictionary;
+                    break;
+                }
+                r += rowInc;
+                c += colInc;
+            }
+
+            return words;
+        },
+        findWords: function() {
+            let words = [];
+            for (let r = 0; r < app.config.rows; r++) {
+                for (let c = 0; c < app.config.cols; c++) {
+                    words = words.concat(app.findWord(r, c, 0, 1));
+                    words = words.concat(app.findWord(r, c, 0, -1));
+                    words = words.concat(app.findWord(r, c, 1, 0));
+                    words = words.concat(app.findWord(r, c, -1, 0));
+                    words = words.concat(app.findWord(r, c, 1, 1));
+                    words = words.concat(app.findWord(r, c, 1, -1));
+                    words = words.concat(app.findWord(r, c, -1, 1));
+                    words = words.concat(app.findWord(r, c, -1, -1));
+                }
+            }
+            words.sort(function(a, b) { 
+                if (a.word < b.word) {
+                    return -1;
+                } 
+                if (a.word > b.word) {
+                    return 1;
+                }
+                return 0;
+            });
+            words.sort(function(a, b) {
+                return b.word.length - a.word.length;
+            });
+            console.dir(words);
+
+            app.state.found = words;
+            
+            let dir = {
+                "1:1": "↘",
+                "-1:-1":"↖",
+                "1:-1": "↙",
+                "-1:1": "↗",
+                "0:1": "→",
+                "1:0": "↓",
+                "0:-1": "←",
+                "-1:0": "↑"
+                    };
+            
+            words.forEach((item)=>{ 
+                let out = '<div class="word" id="word-'+item.start+'-'+item.end+'">'+item.word+' [' + dir[item.dir] + ']</div>\n';
+                $("#player0Words").innerHTML += out;
+            });
+            return words;
         }
 
     };
