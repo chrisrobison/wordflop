@@ -694,6 +694,14 @@ function $$(str) {
                 setTimeout(app.flipLetter, 30, el, ltr, cnt);
             }
         },
+        /**
+         * findWord
+
+         * Takes board cell coordinates and row/col increment/decrement values
+         * and attempts to crawl dictionary trie in app.state.dictionary to 
+         * find words.  Only have it returning 4+ letter words now as result sets 
+         * were much too large when including 2/3 letter words
+         **/
         findWord: function(row, col, rowInc=1, colInc=1) {
             let r = row, 
                 c = col, 
@@ -726,6 +734,9 @@ function $$(str) {
         },
         findWords: function() {
             let words = [];
+            // Instead of having multiple loops checking each direction
+            // we simply loop over each board space and call generic method
+            // 'findWord' with cell coordinates and row/col increment values
             for (let r = 0; r < app.config.rows; r++) {
                 for (let c = 0; c < app.config.cols; c++) {
                     words = words.concat(app.findWord(r, c, 0, 1));
