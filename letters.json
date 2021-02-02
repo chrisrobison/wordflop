@@ -1,0 +1,141 @@
+{
+    "A": {
+        "freq": 82,
+        "value": 1
+    },
+    "B": {
+        "freq": 15,
+        "value": 3,
+        "patent": {
+            "condition": "/^[aeiou].*[aeiou]$/i",
+            "bonus": "earnings * 2"
+        }
+    },
+    "C": {
+        "freq": 28,
+        "value": 3
+    },
+    "D": {
+        "freq": 43,
+        "value": 2
+    },
+    "E": {
+        "freq": 127,
+        "value": 1
+    },
+    "F": {
+        "freq": 22,
+        "value": 4
+    },
+    "G": {
+        "freq": 20,
+        "value": 2
+    },
+    "H": {
+        "freq": 61,
+        "value": 4
+    },
+    "I": {
+        "freq": 70,
+        "value": 1
+    },
+    "J": {
+        "freq": 2,
+        "value": 8,
+        "patent": {
+            "condition": "word.replace(/[^aeiou]*/gi, '').length >= Math.floor(word.length / 2)",
+            "desc": "vowels make up at least half",
+            "bonus": "earnings * 2"
+        }
+    },
+    "K": {
+        "freq": 8,
+        "value": 5,
+        "patent": {
+            "condition": "word.replace(/[^aeiou]*/gi, '').length === 1",
+            "desc": "only one vowel",
+            "bonus": "earnings * 2"
+        }    },
+    "L": {
+        "freq": 40,
+        "value": 1
+    },
+    "M": {
+        "freq": 24,
+        "value": 3
+    },
+    "N": {
+        "freq": 67,
+        "value": 1
+    },
+    "O": {
+        "freq": 75,
+        "value": 1
+    },
+    "P": {
+        "freq": 19,
+        "value": 3
+    },
+    "Q": {
+        "freq": 1,
+        "value": 10,
+        "patent": {
+            "condition": "true",
+            "desc": "You may discard and draw one card before your turn begins.",
+            "bonus": "replace one card before taking turn"
+        },
+        "special": "double coins and stocks. Double word scoring can stack with other patents"
+    },
+    "R": {
+        "freq": 60,
+        "value": 1
+    },
+    "S": {
+        "freq": 63,
+        "value": 1
+    },
+    "T": {
+        "freq": 91,
+        "value": 1
+    },
+    "U": {
+        "freq": 28,
+        "value": 1
+    },
+    "V": {
+        "freq": 10,
+        "value": 4,
+        "patent": {
+            "condition": "true",
+            "bonus": "build two words",
+            "desc": "Receive coins and stocks for each word individually. Other patents can be applied to one word or the other, but not both"
+        }
+    },
+    "W": {
+        "freq": 24,
+        "value": 4
+    },
+    "X": {
+        "freq": 2,
+        "value": 8,
+        "patent": {
+            "condition": true,
+            "bonus": "one letter card twice may be used twice",
+            "desc": "you must use at least three letter cards"
+        }
+    },
+    "Y": {
+        "freq": 20,
+        "value": 4,
+        "special": "must be declared consonant or vowel for patents"
+    },
+    "Z": {
+        "freq": 1,
+        "value": 10,
+        "patent": {
+            "condition": "valid word",
+            "bonus": "you may add 'S' to end of your word",
+            "desc": "must form valid word; you may not purchase the 'S' patent without using an 'S' card. Also, other players do not earn royalties on this extended 'S'"
+        }
+    }
+}

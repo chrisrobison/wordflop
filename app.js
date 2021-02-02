@@ -13,8 +13,8 @@ function $$(str) {
             scoreGoal: 300,
             cellHeight: 34,
             cellWidth: 34,
-            rows: 20,
-            cols: 15,
+            rows: 15,
+            cols: 10,
             items: { "A": { freq: 82, value: 1 }, "B": { freq: 15, value: 3 }, "C": { freq: 28, value: 3 }, "D": { freq: 43, value: 2 }, "E": { freq: 127, value: 1 }, "F": { freq: 22, value: 4 }, "G": { freq: 20, value: 2 }, "H": { freq: 61, value: 4 }, "I": { freq: 70, value: 1 }, "J": { freq: 2, value: 8 }, "K": { freq: 8, value: 5 }, "L": { freq: 40, value: 1 }, "M": { freq: 24, value: 3 }, "N": { freq: 67, value: 1 }, "O": { freq: 75, value: 1 }, "P": { freq: 19, value: 3 }, "Q": { freq: 1, value: 10 }, "R": { freq: 60, value: 1 }, "S": { freq: 63, value: 1 }, "T": { freq: 91, value: 1 }, "U": { freq: 28, value: 1 }, "V": { freq: 10, value: 4 }, "W": { freq: 24, value: 4 }, "X": { freq: 2, value: 8 }, "Y": { freq: 20, value: 4 }, "Z": { freq: 1, value: 10 } } 
         },
         state: {
@@ -647,6 +647,7 @@ function $$(str) {
             }, 100);
             setTimeout(function() {
                 app.dropCells();
+                app.findWords();
             }, 300);
 
         },
@@ -775,11 +776,11 @@ function $$(str) {
                 "0:-1": "←",
                 "-1:0": "↑"
                     };
-            
+            let out = '';
             words.forEach((item)=>{ 
-                let out = '<div class="word" id="word-'+item.start+'-'+item.end+'">'+item.word+' [' + dir[item.dir] + ']</div>\n';
-                $("#player0Words").innerHTML += out;
+                out += '<div class="word" id="word-'+item.start+'-'+item.end+'">'+item.word+' [' + dir[item.dir] + ']</div>\n';
             });
+            $("#player0Words").innerHTML = out;
             return words;
         }
 
