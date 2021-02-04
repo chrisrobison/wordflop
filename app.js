@@ -13,8 +13,8 @@ function $$(str) {
             scoreGoal: 300,
             cellHeight: 34,
             cellWidth: 34,
-            rows: 15,
-            cols: 10,
+            rows: 20,
+            cols: 15,
             items: { "A": { freq: 82, value: 1 }, "B": { freq: 15, value: 3 }, "C": { freq: 28, value: 3 }, "D": { freq: 43, value: 2 }, "E": { freq: 127, value: 1 }, "F": { freq: 22, value: 4 }, "G": { freq: 20, value: 2 }, "H": { freq: 61, value: 4 }, "I": { freq: 70, value: 1 }, "J": { freq: 2, value: 8 }, "K": { freq: 8, value: 5 }, "L": { freq: 40, value: 1 }, "M": { freq: 24, value: 3 }, "N": { freq: 67, value: 1 }, "O": { freq: 75, value: 1 }, "P": { freq: 19, value: 3 }, "Q": { freq: 1, value: 10 }, "R": { freq: 60, value: 1 }, "S": { freq: 63, value: 1 }, "T": { freq: 91, value: 1 }, "U": { freq: 28, value: 1 }, "V": { freq: 10, value: 4 }, "W": { freq: 24, value: 4 }, "X": { freq: 2, value: 8 }, "Y": { freq: 20, value: 4 }, "Z": { freq: 1, value: 10 } } 
         },
         state: {
@@ -60,7 +60,7 @@ function $$(str) {
                 app.state.allwords = data.split(/\n/);
                 //console.dir(app.state.allwords);
                 app.saltBoard();
-                app.fillBoard();
+                //app.fillBoard();
             });
             
             //app.fillBoard();
@@ -398,12 +398,9 @@ function $$(str) {
                 cnt++;
                 //app.addCell($(`#letter_r${curRow}c${curCol}`));
                 out += app.state.board[curRow][curCol];
-                //console.log("[" + curRow + "," + curCol + "] " + out);
                 curRow += ri;
                 curCol += ci;
             }
-            //console.log("cells");
-            //console.dir(app.state.current.cells);
 
             return out;
         },
@@ -465,14 +462,15 @@ function $$(str) {
             let currow = from.row;
             let rowinc = (to.row == from.row) ? 0 : 1;
             let colinc = (to.col == from.col) ? 0 : 1;
+            let cnt = 0;
 
             while ((curcol !== to.col) || (currow !== to.row)) {
-                if (app.state.board[currow][curcol]) {
+                if ((app.state.board[currow][curcol]) && (app.state.board[currow][curcol]!==word[cnt])) {
                     return false;
                 }
                 curcol += colinc;
                 currow += rowinc;
-
+                cnt++;
             }
             
             return true;
@@ -484,6 +482,11 @@ function $$(str) {
                 let pick = word.split('');
 
                 picks.push(word); 
+
+                // Pick random direction for word to follow: 
+                // 0 = vertical, 1 = horizontal, 2 = diagonal 
+                // Should add reverse directions as well as attempts to intersect 
+                // the letters of other words
                 let dir = app.rand(0, 3);
                 let r, c, t = 0, el;
                 
@@ -651,13 +654,15 @@ function $$(str) {
             }, 300);
 
         },
-        mkletter: function(row = 0, col = 0, letter = '') {
+        mkletter: function(row = 0, col = 0, letter = '', xtra='') {
             let oldel = $(`letter_r${row}c${col}`);
             if (oldel) oldel.remove();
 
             let el = document.createElement('div');
             el.id = `letter_r${row}c${col}`;
             el.className = 'letter';
+            if (xtra) el.classList.add(xtra);
+
             el.innerHTML = letter;
             //            el.draggable = "true";
 
@@ -668,7 +673,6 @@ function $$(str) {
         },
         dumpBoard: function() {
             let out = '',cols = '   ';
-
             
             for (let r = 0; r < app.config.rows; r++) {
                 let sr = (r < 10) ? ' ' + r : r;
@@ -709,7 +713,7 @@ function $$(str) {
                 point = app.state.dictionary,
                 tmpword = '', words = [];
             
-            while ((r > 0) && (r < app.config.rows) && (c > 0) && (c < app.config.cols)) {
+            while ((r >= 0) && (r < app.config.rows) && (c >= 0) && (c < app.config.cols)) {
                 if (point[app.state.board[r][c]]) {
                     tmpword += app.state.board[r][c];
                     point = point[app.state.board[r][c]];
