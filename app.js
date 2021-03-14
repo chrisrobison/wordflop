@@ -60,7 +60,7 @@ function $$(str) {
                 app.state.allwords = data.split(/\n/);
                 //console.dir(app.state.allwords);
                 app.saltBoard();
-                //app.fillBoard();
+                app.fillBoard();
             });
             
             //app.fillBoard();
@@ -232,7 +232,7 @@ function $$(str) {
            // line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 19) + 'px';
             line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 20) + 'px';
             
-           line.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) -14) + 'px';
+            line.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) - 30) + 'px';
             
             line.style.transform = `scale(-1) rotate(-${angle}deg)`;
             line.style.width = (len + app.config.cellWidth) + 'px';
@@ -269,7 +269,8 @@ function $$(str) {
             $("#board").addEventListener("mouseup", app.doUp);
             $("#board").addEventListener("mousemove", app.doMove);
             app.state.currentWordScore = app.config.items[app.state.board[coord.row][coord.col]].value;
-            app.mkLine(e.clientX, e.clientY);
+            //app.mkLine(e.clientX, e.clientY);
+            app.mkLine(Math.round(e.clientX / app.config.cellWidth) * app.config.cellWidth, Math.round(e.clientY / app.config.cellHeight) * app.config.cellHeight);
         },
         doMove: function(e) {
             let dx, dy, theta, len;
