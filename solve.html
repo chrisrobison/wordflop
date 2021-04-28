@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+<style>
+    body {
+        font-family: "Helvetica Neue", "Helvetica", sans-serif;
+        margin:0;
+        padding:0;
+        font-size:14px;
+    }
+    header {
+        background-color:#999;
+        color:#eee;
+        height:0vh;
+    }
+    main {
+        background-color:#333;
+        color:#ddd;
+        height:100vh;
+        overflow:scroll;
+    }
+    #wrap {
+        display:flex;
+        align-items: center;
+        justify-content: center;
+    }
+    footer {
+        background-color:#666;
+        color:#eee;
+        height:0vh;
+    }
+    table {
+        font-size:24px;
+        margin: 1em auto;
+    }
+    TD {
+       height: 2em; 
+       width: 2em;
+    }
+    TD INPUT[type="text"] {
+        width: 2em;
+        height:2em;
+        font-size:2em;
+        text-align: center;
+        text-transform: uppercase;
+    }
+    #debug {
+        width:20em;
+        height:20em;
+        overflow:scroll;
+        border: 1px solid #000;
+        border-radius:1em;
+        display:inline-block;
+        background-color:#eee;
+        box-shadow: 4px 4px 4px #0009;
+        color:#222;
+        font-family: monospace;
+    }
+    #results {
+        width:20em;
+        height:20em;
+        overflow:scroll;
+        border: 1px solid #000;
+        display:inline-block;
+        border-radius:1em;
+        background-color:#eee;
+        box-shadow: 4px 4px 4px #0009;
+        color:#222;
+        font-family: monospace;
+    }
+    .highlight {
+        background-color: #ffff00;
+    }
+    button {
+        font-size:24px;
+        height: 2em;
+        border-radius: 1em;
+        padding: 0 1em;
+        background: linear-gradient(180deg, rgba(238,238,238,1) 0%, rgba(238,238,238,1) 49%, rgba(204,204,204,1) 50%, rgba(204,204,204,1) 100%);
+        box-shadow: 3px 3px 3px #0009;
+    }
+    fieldset {
+        display:inline-block;
+        margin: 1em auto;
+        border-radius: 1em;
+    }
+    output {
+        display:flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #toolbar {
+        display:flex;
+        align-items: center;
+        justify-content: center;
+        margin-top:1em;
+    }
+    .checking {
+        background-color:#ee0000;
+        color:#fff;
+    }
+</style>
+</head>
+
+<body> 
+<main>
+    <div id='toolbar'>
+        <button onclick="app.solve()">Solve</button> <button onclick='app.fillRandom()'>Randomize</button>
+    </div>
+    <div id='wrap'>
+        <table>
+            <tr>
+                <td><input type='text' id='A1' value='B'></td>
+                <td><input type='text' id='A2' value='A'></td>
+                <td><input type='text' id='A3' value='S'></td>
+                <td><input type='text' id='A4' value='E'></td>
+            </tr>
+            <tr>
+                <td><input type='text' id='B1' value='E'></td>
+                <td><input type='text' id='B2' value='G'></td>
+                <td><input type='text' id='B3' value='O'></td>
+                <td><input type='text' id='B4' value='A'></td>
+            </tr>
+            <tr>
+                <td><input type='text' id='C1' value='S'></td>
+                <td><input type='text' id='C2' value='O'></td>
+                <td><input type='text' id='C3' value='A'></td>
+                <td><input type='text' id='C4' value='R'></td>
+            </tr>
+            <tr>
+                <td><input type='text' id='D1' value='T'></td>
+                <td><input type='text' id='D2' value='U'></td>
+                <td><input type='text' id='D3' value='R'></td>
+                <td><input type='text' id='D4' value='N'></td>
+            </tr>
+        </table>
+    </div>
+    <output>
+    <fieldset>
+        <legend>Output</legend>
+        <div id='debug'>
+        </div>
+        <div id='results'>
+        </div>
+    </fieldset>
+    </output>
+</main>
+
+<script>
+const $ = (str) => document.querySelector(str);
+const $$ = (str) => document.querySelectorAll(str);
+const rand = (min, max) => Math.random() * (max - min) + min;
+/*
+    A - B - C - D
+    | X | X | X |             1 2 3
+    E - F - G - H              
+    | X | X | X |             4   5
+    I - J - K - L
+    | X | X | X |             6 7 8
+    M - N - O - P
+
+    A B C D E F G H I J K L M N O P
+    E F G H
+    I J K L 
+    M N O P
+
+    -5, -4, -3, -1, 1, 3, 4, 5
+*/
+    (function() {
+        const app = {
+            init: function() {
+                app.initLetters();
+                $("table").addEventListener("focusin", (event) => {
+                    event.target.style.background = "#ff0f";
+                    event.target.setSelectionRange(0, event.target.value.length);
+                    app.state.currentCell = event.target.id;
+                });
+
+                $("table").addEventListener("focusout", (event) => {
+                    event.target.style.background = "#ffff";
+                    event.target.value = event.target.value.toUpperCase();
+                    app.state.currentCell = '';
+                });
+
+
+                fetch("all.js").then(response=>response.json()).then(data=>{
+                    app.state.dict = data;
+                    app.state.loaded = true;
+                });
+            },
+            
+            /**
+             *  initLetters
+             * 
+             *  Create a pool of letters that is filled according to letter frequencies
+             *
+             **/
+            initLetters: function() {
+                let letterString = "";
+
+                for (const [key, value] of Object.entries(app.config.letters)) {
+                    letterString += key.repeat(value.freq);
+                }
+
+                app.state.letters = letterString.split('');
+                app.shuffle(app.state.letters);
+                app.shuffle(app.state.letters);
+                app.shuffle(app.state.letters);
+                app.state.letterString = app.state.letters.join('');
+                console.log(app.state.letterString);
+            },
+            shuffle: function(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            },
+
+
+            /**
+             * fillRandom
+             *
+             * Fill board with random letters
+             *
+             **/
+            fillRandom: function() {
+                for (let r=1; r < 5; r++) {
+                    for (let c=1; c < 5; c++) {
+                        let letter = app.state.letters.splice(~~(Math.random() * app.state.letters.length), 1)[0];
+                        $(`#${app.config.rows[r]}${c}`).value = letter;
+                    }
+                }
+            },
+            readGrid: function() {
+                let allvals = [], out = '';
+                ['A','B','C','D'].forEach((letter)=>{
+                    for (let c=1; c < 5; c++) {
+                        let val = $(`#${letter}${c}`).value;
+                        app.state.grid[letter][c] = val
+                        app.state.table[letter.charCodeAt(0) - 64][c] = val
+                        allvals.push(val);
+                        out += val + ' ';
+                    }
+                    out += "<br>\n";
+                });
+                
+                $("#debug").innerHTML = out;
+                
+                console.table(app.state.table);
+                return app.state.table;
+            },
+            solve: function() {
+                let table = app.readGrid();
+                let curdict = app.state.dict;
+                let word = '';
+
+                for (let r=1; r < 5; r++) {
+                    
+                    for (let c=1; c < 5; c++) {
+                        word = app.recurse({r:r, c:c}, table[r][c], {A1:1}, curdict[table[r][c]]);
+
+                        if (word) {
+                            console.log(`Found word ${word}`);
+                            app.state.words.push(word);
+                        }
+                    }
+                }
+                $("#results").innerHTML = app.state.words.join("<br>\n");
+                
+                
+            },
+            isWord: function(word) {
+                let letters = word.split('');
+                let dict = app.state.dict;
+
+                for (let i=0; i<letters.length; i++) {
+                    
+                }
+            },
+
+            /*
+              [-1,-1], [0,-1], [1,-1],
+              [-1, 0],         [1, 0], 
+              [-1, 1], [0, 1], [1, 1], 
+                
+            */
+            config: {
+                letters: { "A": { freq: 82, value: 1 }, "B": { freq: 15, value: 3 }, "C": { freq: 28, value: 3 }, "D": { freq: 43, value: 2 }, "E": { freq: 127, value: 1 }, "F": { freq: 22, value: 4 }, "G": { freq: 20, value: 2 }, "H": { freq: 61, value: 4 }, "I": { freq: 70, value: 1 }, "J": { freq: 2, value: 8 }, "K": { freq: 8, value: 5 }, "L": { freq: 40, value: 1 }, "M": { freq: 24, value: 3 }, "N": { freq: 67, value: 1 }, "O": { freq: 75, value: 1 }, "P": { freq: 19, value: 3 }, "Q": { freq: 1, value: 10 }, "R": { freq: 60, value: 1 }, "S": { freq: 63, value: 1 }, "T": { freq: 91, value: 1 }, "U": { freq: 28, value: 1 }, "V": { freq: 10, value: 4 }, "W": { freq: 24, value: 4 }, "X": { freq: 2, value: 8 }, "Y": { freq: 20, value: 4 }, "Z": { freq: 1, value: 10 } },
+                search: [
+                      [-1,-1], [0,-1], [1,-1],
+                      [-1, 0],         [1, 0], 
+                      [-1, 1], [0, 1], [1, 1]
+                ],
+                rows: ['', 'A', 'B', 'C', 'D' ]
+            },
+            recurse: function(cell, word, seen, dict) {
+                let nextLetter;
+                console.log(`>>>>>>>>> NEXT LEVEL CHECK: cell [${cell.c},${cell.r}] with word ${word}`);
+                console.dir(seen);
+                $(`#${app.config.rows[cell.r]}${cell.c}`).classList.add('checking');
+                app.config.search.forEach(search=>{
+                    let c = cell.c + search[0];
+                    let r = cell.r + search[1];
+                    console.log(`checking [${c}, ${r}]`);
+                    if (((c > 0) && (c < 5)) && ((r > 0) && (r < 5))) {
+                        nextLetter = app.state.table[r][c];
+                        $(`#${app.config.rows[r]}${c}`).classList.toggle('highlight');
+
+                        if (dict[nextLetter]) {
+                            console.log(`Found next letter in dictionary: ${nextLetter} for ${word}.`);
+                            if (!seen[app.config.rows[r] + c]) {
+                                seen[app.config.rows[r] + c] = 1;;
+                                console.log(`Recursing to cell [${c},${r}] with word ${word}+${nextLetter}`);
+                                newword = app.recurse({r:r, c:c}, word + nextLetter, seen, dict[nextLetter]);
+                            } else {
+                                console.log(`Skipping seen cell ${app.config.rows[r] + c}`);
+                            }
+                        }  else {
+                            console.log(`No next letter ${nextLetter} for word ${word}`);
+                        }
+                        
+                        if (dict["$"]) {
+                            app.addWord(word);
+                        }
+                        setTimeout(function() { $(`#${app.config.rows[r]}${c}`).classList.toggle('highlight'); }, 1000 * (r * c));
+                    } else {
+                        console.log(`skipping; out of range [${c},${r}]`);
+                    }
+                });
+            
+                $(`#${app.config.rows[cell.r]}${cell.c}`).classList.remove('checking');
+            },
+            addWord: function(word) {
+                if (!app.state.words.includes(word)) {
+                    console.log(`Found word: ${word}`);
+                    app.state.words.push(word);
+                    app.state.words.sort();
+                }
+    
+            },
+            state: {
+                loaded: false,
+                rows: ['A','B','C','D'],
+                currentCell: '',
+                grid: {A:[],B:[],C:[],D:[]},
+                table: [[], [], [], [], []],
+                words: [],
+                letters: []
+            }
+        }
+        window.app = app;
+        app.init();
+    })();
+</script>
+</body>
+
+</html>

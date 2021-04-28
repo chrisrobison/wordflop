@@ -229,10 +229,14 @@ function $$(str) {
 
             line.classList.add('line');
             
+            let b = $("#board").getClientRects()[0];
+
            // line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 19) + 'px';
             line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 20) + 'px';
             
-            line.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) - 30) + 'px';
+
+            //line.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) - 30) + 'px';
+            line.style.left = ((Math.round(app.state.lastPos.col * app.config.cellWidth) + b.width) - (app.config.cellWidth * 2)) + 'px';
             
             line.style.transform = `scale(-1) rotate(-${angle}deg)`;
             line.style.width = (len + app.config.cellWidth) + 'px';
@@ -270,7 +274,10 @@ function $$(str) {
             $("#board").addEventListener("mousemove", app.doMove);
             app.state.currentWordScore = app.config.items[app.state.board[coord.row][coord.col]].value;
             //app.mkLine(e.clientX, e.clientY);
-            app.mkLine(Math.round(e.clientX / app.config.cellWidth) * app.config.cellWidth, Math.round(e.clientY / app.config.cellHeight) * app.config.cellHeight);
+            let b = $("#board").getClientRects()[0];
+
+            app.mkLine((coord.col * app.config.cellWidth) + b.left + (app.config.cellWidth / 2), Math.round(e.clientY / app.config.cellHeight) * app.config.cellHeight);
+            //app.mkLine(Math.round(e.clientX / app.config.cellWidth) * app.config.cellWidth, Math.round(e.clientY / app.config.cellHeight) * app.config.cellHeight);
         },
         doMove: function(e) {
             let dx, dy, theta, len;
