@@ -5,12 +5,16 @@ body {
     font-size: 18px;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
 }
 
 header {
     background-color: #999;
     color: #eee;
-    height: 5vh;
+    height: 0vh;
 }
 
 nav {
@@ -23,16 +27,14 @@ nav {
 main {
     background-color: #333;
     color: #ddd;
-    height: 90vh;
-    width: 100%;
     text-align: center;
-    display: inline-block;
+    display: flex;
 }
 
 footer {
     background-color: #666;
     color: #eee;
-    height: 5vh;
+    height: 0vh;
 }
 
 section {
@@ -82,7 +84,7 @@ aside {
 
 #board {
     display: inline-block;
-    max-width: 510px;
+    width: 510px;
     position: relative;
 }
 
@@ -126,7 +128,7 @@ aside {
 }
 
 .words {
-    height: 88%;
+    height: 50vh;;
     overflow: scroll;
     background-color: #555;
     column-count: 2;
@@ -148,6 +150,19 @@ h2 {
     width: 5em;
 }
 
+#solution {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    flex-direction: column;
+    padding: 1em;
+    background-color: #000;
+    box-sizing: border-box;
+    color: #0c0;
+}
+div.word {
+    display: inline-block;
+    width: 8em;
+}
 .highlighted {
     background-color: #666;
 }
@@ -159,6 +174,10 @@ h2 {
     border: 3px solid #fff;
     border-radius: 25px;
     pointer-events: none;
+    border-top-color: #f00;
+    border-bottom-color: #00f;
+    border-left-color: #0f0;
+    border-right-color: #ff0;
 }
 
 @keyframes bounce0 {
@@ -203,7 +222,7 @@ svg#countdown {
     width: 100px;
     height: 100px;
     transform: rotate(-90deg);
-    background: #09f;
+    background: #30303f;;
     border-radius: 50%;
 }
 
@@ -215,18 +234,18 @@ circle#groove {
 }
 
 circle#timer {
-    stroke: #ccc;
+    stroke: #0a0;
     fill: transparent;
     stroke-width: 6;
     stroke-dasharray: 0 100;
-    animation: fillup 12s linear infinite 1s;
+    animation: fillup 10s linear infinite 1s;
     /* for 38% */
 }
 
 circle#second {
     stroke: #ff0;
     fill: transparent;
-    stroke-width: 7;
+    stroke-width: 4;
     stroke-dash-array: 0 100;
     animation: second 1s linear infinite alternate 1s;
 }
@@ -258,7 +277,11 @@ circle#second {
         stroke-dasharray: 100 100;
     }
 }
-
+text#timerText {
+    transform: rotate(90deg);
+    fill:#fff;
+    letter-spacing:-3px;
+}
 
 /*
 .ls-2x {
@@ -277,3 +300,91 @@ circle#second {
 #r0c3,#r0c11,#r2c6,#r2c8,#r3c7,#r3c0,#r3c14,#r6c2,#r6c6,#r6c8,#r6c12,#r7c3,#r7c11,#r8c2,#r8c6, #r8c8,#r8c12,#r11c0,#r11c7,#r11c14,#r12c6,#r12c8,#r14c3,#r14c11 { background-color:#0bc5; }
 #r1c5,#r1c9 ,#r5c1,#r5c5,#r5c9,#r5c13,#r9c1,#r9c5,#r9c13,#r13c5,#r13c9 { background-color:#06f5 }
 */
+    
+svg.timer {
+    width: 100px;
+    height: 100px;
+    transform: rotate(-90deg);
+    background: #09f;
+    border-radius: 50%;
+}
+
+circle#groove {
+    stroke: #d00;
+    fill: transparent;
+    stroke-width: 6;
+    stroke-dasharray: 314 314;
+}
+circle#timer {
+    stroke: #ccc;
+    fill: transparent;
+    stroke-width: 6;
+    stroke-dasharray: 0 314;
+    animation: fillup 10s linear infinite ;
+    /* for 38% */
+}
+circle#second {
+    stroke: #cdf;
+    fill: transparent;
+    stroke-width: 9;
+    stroke-dash-array: 0 314;
+    animation: second 1s linear infinite alternate 0s;
+}
+#timer1 {
+    text-align: center;
+    position: relative;
+}
+#timer2 {
+    position: relative;
+    text-align center;
+}
+.stopwatch {
+    font-family: "Helvetica Neue","Helvetica","Arial",sans-serif;
+    font-size:48px;
+    color:#fff;
+    z-index:999; 
+    text-align:center;
+    width:100px;
+    height:80px;
+    margin-top:20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.stopwatch::after {
+    display:inline-block;
+    position:relative;
+    width:2em;
+    height:2em;
+    content: "0";
+    animation: countdown 20s linear infinite 0s;
+    margin: 0px auto; 
+}
+@keyframes second {
+    0% { stroke-dasharray: 314 314; }
+    100% { stroke-dasharray: 0 314; }
+}
+@keyframes fillup {
+    0% { stroke-dasharray: 314 314; }
+    90% { stroke-dasharray: 0 314; }
+    100% { stroke-dasharray: 314 314; }
+}
+@keyframes countdown {
+    0% { content: "10"; }
+    10% { content: "9"; }
+    20% { content: "8"; }
+    30% { content: "7"; }
+    40% { content: "6"; }
+    50% { content: "5"; }
+    60% { content: "4"; }
+    70% { content: "3"; }
+    80% { content: "2"; }
+    90% { content: "1"; }
+    100% { content: "0"; }
+
+}
+.pie {
+    height: 100px;
+    width: 100px;
+    background: #000;
+}
+

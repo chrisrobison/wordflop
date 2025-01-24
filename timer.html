@@ -15,22 +15,22 @@
             stroke: #d00;
             fill: transparent;
             stroke-width: 6;
-            stroke-dasharray: 100 100;
+            stroke-dasharray: 314 314;
         }
         circle#timer {
             stroke: #ccc;
             fill: transparent;
             stroke-width: 6;
-            stroke-dasharray: 0 100;
-            animation: fillup 12s linear infinite 1s;
+            stroke-dasharray: 0 314;
+            animation: fillup 10s linear infinite ;
             /* for 38% */
         }
         circle#second {
-            stroke: #ff0;
+            stroke: #cdf;
             fill: transparent;
-            stroke-width: 7;
-            stroke-dash-array: 0 100;
-            animation: second 1s linear infinite alternate 1s;
+            stroke-width: 9;
+            stroke-dash-array: 0 314;
+            animation: second 1s linear infinite alternate 0s;
         }
         #stopwatch {
             font-family: "Helvetica Neue","Helvetica","Arial",sans-serif;
@@ -49,17 +49,17 @@
             width:2em;
             height:2em;
             content: "0";
-            animation: countdown 12s linear infinite 1s;
+            animation: countdown 20s linear infinite 0s;
             
         }
         @keyframes second {
-            0% { stroke-dasharray: 100 100; }
-            100% { stroke-dasharray: 0 100; }
+            0% { stroke-dasharray: 314 314; }
+            100% { stroke-dasharray: 0 314; }
         }
         @keyframes fillup {
-            0% { stroke-dasharray: 100 100; }
-            90% { stroke-dasharray: 0 100; }
-            100% { stroke-dasharray: 100 100; }
+            0% { stroke-dasharray: 314 314; }
+            90% { stroke-dasharray: 0 314; }
+            100% { stroke-dasharray: 314 314; }
         }
         @keyframes countdown {
             0% { content: "10"; }
@@ -74,6 +74,11 @@
             90% { content: "1"; }
             100% { content: "0"; }
         
+        }
+        .pie {
+            height: 100px;
+            width: 100px;
+            background: #000;
         }
     </style>
 </head>
@@ -108,25 +113,25 @@
                         circle3 = document.createElementNS(NS, "circle"),
                         title = document.createElementNS(NS, "title");
                     
-                    circle3.setAttribute("r", 16);
+                    circle3.setAttribute("r", 45);
                     circle3.setAttribute("id", "second");
-                    circle3.setAttribute("cx", 16);
-                    circle3.setAttribute("cy", 16);
-                    circle3.setAttribute("stroke-dasharray", "0 100");
+                    circle3.setAttribute("cx", 50);
+                    circle3.setAttribute("cy", 50);
+                    circle3.setAttribute("stroke-dasharray", "0 314");
 
-                    circle2.setAttribute("r", 16);
+                    circle2.setAttribute("r", 45);
                     circle2.setAttribute("id", "groove");
-                    circle2.setAttribute("cx", 16);
-                    circle2.setAttribute("cy", 16);
-                    circle2.setAttribute("stroke-dasharray", "0 100");
+                    circle2.setAttribute("cx", 50);
+                    circle2.setAttribute("cy", 50);
+                    circle2.setAttribute("stroke-dasharray", "0 314");
 
-                    circle.setAttribute("r", 16);
+                    circle.setAttribute("r", 45);
                     circle.setAttribute("id", "timer");
-                    circle.setAttribute("cx", 16);
-                    circle.setAttribute("cy", 16);
-                    circle.setAttribute("stroke-dasharray", "0 100");
+                    circle.setAttribute("cx", 50);
+                    circle.setAttribute("cy", 50);
+                    circle.setAttribute("stroke-dasharray", "0 314");
 
-                    svg.setAttribute("viewBox", "0 0 32 32");
+                    svg.setAttribute("viewBox", "0 0 100 100");
                     title.textContent = amt;
                     pie.textContent = "";
                     svg.appendChild(title);

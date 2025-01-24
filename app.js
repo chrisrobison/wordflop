@@ -25,6 +25,7 @@ function $$(str) {
             events: {},
             currentWord: "",
             currentWordScore: 0,
+            timers: [],
             current: {
                 cells: [],
                 word: [],
@@ -65,9 +66,26 @@ function $$(str) {
             
             //app.fillBoard();
             // app.makeTimer(10);
+            $("#timer2").style.display = "none";
+            app.state.timers.push(setTimeout(function() {
+                app.nextPlayer();
+            }, 20000));
 
             $("#board").addEventListener("mousedown", app.doDown);
             $("#player0Words").addEventListener("mouseover", app.highlightWord);
+
+            app.state.timers.push(app.makeTimer(0, $("#pie1")));
+            app.state.timers.push(app.makeTimer(0, $("#pie2")));
+        },
+        nextPlayer: function() {
+            app.clearTimeouts();
+            $("main").classList.remove("player" + app.state.currentPlayer);
+
+            $(`#timer${app.state.currentPlayer+1}`).style.display = "none";
+            $(`#timer${(app.state.currentPlayer ^ 1)+1}`).style.display = "inline-block";
+            app.state.currentPlayer ^= 1;
+            $("main").classList.add("player" + app.state.currentPlayer);
+            app.state.timers.push(setTimeout(app.nextPlayer, 20000));
         },
         highlightWord: function(e) {
             if (e.target.id.match(/^word/)) {
@@ -169,79 +187,23 @@ function $$(str) {
             };
             return out;
         },
-        makeTimer: function(amt) {
-            let pie = $("#pie");
-
-            let p = parseFloat(amt),
-                NS = "http://www.w3.org/2000/svg",
-                svg = document.createElementNS(NS, "svg"),
-                circle = document.createElementNS(NS, "circle"),
-                circle2 = document.createElementNS(NS, "circle"),
-                circle3 = document.createElementNS(NS, "circle"),
-                title = document.createElementNS(NS, "title");
-            svg.setAttribute("class", "timer");
-            svg.setAttribute("id", "countdown");
-
-            circle3.setAttribute("r", 16);
-            circle3.setAttribute("id", "second");
-            circle3.setAttribute("cx", 16);
-            circle3.setAttribute("cy", 16);
-            circle3.setAttribute("stroke-dasharray", "0 100");
-
-            circle2.setAttribute("r", 16);
-            circle2.setAttribute("id", "groove");
-            circle2.setAttribute("cx", 16);
-            circle2.setAttribute("cy", 16);
-            circle2.setAttribute("stroke-dasharray", "0 100");
-
-            circle.setAttribute("r", 16);
-            circle.setAttribute("id", "timer");
-            circle.setAttribute("cx", 16);
-            circle.setAttribute("cy", 16);
-            circle.setAttribute("stroke-dasharray", "0 100");
-
-            svg.setAttribute("viewBox", "0 0 32 32");
-            title.textContent = amt;
-            svg.appendChild(title);
-            svg.appendChild(circle3);
-            svg.appendChild(circle2);
-            svg.appendChild(circle);
-            pie.appendChild(svg);
-            setTimeout(function() { circle.setAttribute("stroke-dasharray", "100 100"); }, 500);
-        },
-        mkLine: function(x, y) {
+        mkLine: function(x, y, r, c) {
             app.state.current.lines.push(app.state.currentLine);
 
             const line = document.createElement('div');
-            app.state.currentLine = line;
-
-            // Use maths to determine line length and angle between 
-            // last known position and current x,y coordinates
-            let dx = app.state.lastPos.x - x;
-            let dy = app.state.lastPos.y - y;
-
-            let theta = Math.atan2(dy, dx);
-            theta *= 180 / Math.PI;
-            if (theta < 0) theta = 360 + theta;
-            theta -= 180;
-            let angle = Math.round(theta / 45) * 45;
-            let len = Math.sqrt((dx * dx) + (dy * dy));
-
             line.classList.add('line');
             
-            let b = $("#board").getClientRects()[0];
+            app.state.currentLine = line;
 
-           // line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 19) + 'px';
-            line.style.top = ((Math.round(app.state.lastPos.y / app.config.cellHeight) * app.config.cellHeight) - 20) + 'px';
+            let len = app.config.cellWidth;
             
-
-            //line.style.left = ((Math.round(app.state.lastPos.x / app.config.cellWidth) * app.config.cellWidth) - 30) + 'px';
-            line.style.left = ((Math.round(app.state.lastPos.col * app.config.cellWidth) + b.width) - (app.config.cellWidth * 2)) + 'px';
+            line.style.top = ((Math.round(y / app.config.cellHeight) * app.config.cellHeight))  + 'px';
+            line.style.left = (Math.round(x / app.config.cellWidth) * app.config.cellWidth) + 'px';
             
-            line.style.transform = `scale(-1) rotate(-${angle}deg)`;
-            line.style.width = (len + app.config.cellWidth) + 'px';
+            line.style.transform = `scale(1) rotate(0deg)`;
+            line.style.width = len + 'px';
             line.style.height = (app.config.cellHeight - 3) + "px";
-            $("main").appendChild(line);
+            $("#board").appendChild(line);
 
             app.state.current.lines.unshift(line);
 
@@ -256,7 +218,8 @@ function $$(str) {
             //            };
 
             let coord = app.getCoord(e.target.id);
-
+console.log(`doDown: coord:${coord}`);
+            console.dir(coord);
             app.state.lastPos = {
                 row: coord.row,
                 col: coord.col,
@@ -264,7 +227,7 @@ function $$(str) {
                 y: e.clientY
             };
             console.dir(app.state.lastPos);
-            //e.target.classList.add('selected');
+            e.target.classList.add('selected');
             app.state.currentWord = app.state.board[coord.row][coord.col];
             $("#currentWord").innerHTML = app.state.currentWord;
 
@@ -274,13 +237,14 @@ function $$(str) {
             $("#board").addEventListener("mousemove", app.doMove);
             app.state.currentWordScore = app.config.items[app.state.board[coord.row][coord.col]].value;
             //app.mkLine(e.clientX, e.clientY);
-            let b = $("#board").getClientRects()[0];
 
-            app.mkLine((coord.col * app.config.cellWidth) + b.left + (app.config.cellWidth / 2), Math.round(e.clientY / app.config.cellHeight) * app.config.cellHeight);
+            app.mkLine((coord.col * app.config.cellWidth) - (app.config.cellWidth / 2), (coord.row * app.config.cellHeight) - (app.config.cellHeight / 2));
             //app.mkLine(Math.round(e.clientX / app.config.cellWidth) * app.config.cellWidth, Math.round(e.clientY / app.config.cellHeight) * app.config.cellHeight);
         },
         doMove: function(e) {
             let dx, dy, theta, len;
+            console.log("doMove", e);
+            console.dir(e);
             dx = app.state.lastPos.x - e.clientX;
             dy = app.state.lastPos.y - e.clientY;
 
@@ -290,7 +254,7 @@ function $$(str) {
             let angle = Math.round(theta / 45) * 45;
 
             if (app.state.current.lines[0]) {
-                app.state.current.lines[0].style.transform = `scaleX(-1) rotate(${angle}deg)`;
+                app.state.current.lines[0].style.transform = `scale(-1) rotate(-${angle}deg)`;
                 app.state.current.lines[0].style.width = len + app.config.cellWidth + 'px';
             }
         },
@@ -325,9 +289,14 @@ function $$(str) {
             app.state.currentWord = "";
             app.state.current.word = [];
             //app.state.currentPlayer ^= 1;
-            app.switchPlayer();
+            app.nextPlayer();
 
             //$("#currentWord").innerHTML = app.state.currentWord;
+        },
+        clearTimeouts: function() {
+            app.state.timers.forEach(rsc=>{
+                clearTimeout(rsc);
+            });
         },
         switchPlayer: function() {
             $("main").classList.remove("player" + app.state.currentPlayer);
@@ -662,6 +631,54 @@ function $$(str) {
             }, 300);
 
         },
+        pauseTimer: function() {
+
+        },
+        makeTimer: function(amt, pie) {
+            
+            let p = parseFloat(amt),
+                NS = "http://www.w3.org/2000/svg",
+                svg = document.createElementNS(NS, "svg"),
+                circle = document.createElementNS(NS, "circle"),
+                circle2 = document.createElementNS(NS, "circle"),
+                circle3 = document.createElementNS(NS, "circle"),
+                title = document.createElementNS(NS, "title");
+            
+            circle3.setAttribute("r", 45);
+            circle3.setAttribute("id", "second");
+            circle3.setAttribute("cx", 50);
+            circle3.setAttribute("cy", 50);
+            circle3.setAttribute("stroke-dasharray", "0 314");
+
+            circle2.setAttribute("r", 45);
+            circle2.setAttribute("id", "groove");
+            circle2.setAttribute("cx", 50);
+            circle2.setAttribute("cy", 50);
+            circle2.setAttribute("stroke-dasharray", "0 314");
+
+            circle.setAttribute("r", 45);
+            circle.setAttribute("id", "timer");
+            circle.setAttribute("cx", 50);
+            circle.setAttribute("cy", 50);
+            circle.setAttribute("stroke-dasharray", "0 314");
+
+            svg.setAttribute("viewBox", "0 0 100 100");
+            title.textContent = amt;
+            pie.textContent = "";
+            svg.appendChild(title);
+            svg.appendChild(circle3);
+            svg.appendChild(circle2);
+            svg.appendChild(circle);
+            pie.appendChild(svg);
+            setTimeout(function() { circle.setAttribute("stroke-dasharray", "100 100"); }, 500);
+        },
+        updateTimer: function() {
+            let a = $("#timer").getAnimations();
+console.dir(a);
+        
+            $("#groove").setAttribute('stroke-dasharray', "100 100");
+        },
+
         mkletter: function(row = 0, col = 0, letter = '', xtra='') {
             let oldel = $(`letter_r${row}c${col}`);
             if (oldel) oldel.remove();
@@ -792,7 +809,7 @@ function $$(str) {
             words.forEach((item)=>{ 
                 out += '<div class="word" id="word-'+item.start+'-'+item.end+'">'+item.word+' [' + dir[item.dir] + ']</div>\n';
             });
-            $("#player0Words").innerHTML = out;
+            $("#solution").innerHTML = out;
             return words;
         }
 

@@ -7,16 +7,41 @@
     <link rel='stylesheet' href='style.css'>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+main {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+}
+        nav { position: relative; }
+        aside { position: relative; }
+        #pie1 {
+        }
+        .timer {
+            display: inline-block;
+        }
+        #timer1,#timer2 {
+            display: inline-block;
+        }
+        .stopwatch {
+            position: absolute;
+            top:0px;
+        }
+</style>
 </head>
 <body id="home">
     <main class='player0'>
         <section>
             <nav>
-                <div id='pie' class='timer'></div>
                 <h2>Player 1</h2>
                 <div class='score' id='player0Score'>0 / 300</div>
                 <div class='words' id='player0Words'></div>
                 <div class='arrow'></div>
+                <div id='timer1'>
+                    <div id='pie1' class='pie timer'></div>
+                    <div class='stopwatch'></div>
+                </div>
             </nav>
             <div id="board">
 
@@ -26,9 +51,14 @@
                 <div class='score' id='player1Score'>0 / 300</div>
                 <h2>Player 2</h2>
                 <div class='words' id='player1Words'></div>
+                <div id='timer2'>
+                    <div id='pie2' class='pie timer'></div>
+                    <div class='stopwatch'></div>
+                </div>
             </aside>
         </section>
     </main>
+        <div id='solution'></div>
     <footer>
     </footer>
     <script>

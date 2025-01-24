@@ -193,6 +193,9 @@
                         
                         if (newrow == 'E') {
                             app.solve();
+                            newrow = "A";
+                            newcol = "1";
+                            $(`#${newrow}${newcol}`).focus();
                         } else if (newrow && newcol) {
                             $(`#${newrow}${newcol}`).focus();
                         }
@@ -247,7 +250,7 @@
                         out = '';
                     ['A', 'B', 'C', 'D'].forEach((letter) => {
                         for (let c = 1; c < 5; c++) {
-                            let val = $(`#${letter}${c}`).value;
+                            let val = $(`#${letter}${c}`).value.toUpperCase();
                             app.state.grid[letter][c] = val
                             app.state.table[letter.charCodeAt(0) - 64][c] = val
                             allvals.push(val);
@@ -265,6 +268,7 @@
                     let table = app.readGrid();
                     let curdict = app.state.dict;
                     let word = '';
+                    app.state.words = [];
 
                     for (let r = 1; r < 5; r++) {
 
